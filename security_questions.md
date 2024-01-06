@@ -41,7 +41,7 @@ These questions require fundamental knowledge of security concepts and are usual
 
 **What is the difference between symmetric and asymmetric encryption?**
     
-    **symmetric**:
+**symmetric**:
 
     - single key: same key for encryption + decryption. key must be shared and kept secret.
 
@@ -61,7 +61,7 @@ These questions require fundamental knowledge of security concepts and are usual
 
         2. scalability: managing keys with many users is complex
     
-    **asymmetric**:
+**asymmetric**:
 
     - key pair: public key (can be shared) + private key (secret)
 
@@ -84,7 +84,7 @@ These questions require fundamental knowledge of security concepts and are usual
 
 **What’s the difference between Diffie-Hellman and RSA?**
     
-    **DH**:
+**DH**:
     
     - used for securely exchanging crypto keys over a public channel
 
@@ -104,7 +104,7 @@ These questions require fundamental knowledge of security concepts and are usual
 
         2. quantum computing attacks
 
-    **RSA**:
+**RSA**:
 
     - encryption of data and digital signatures
 
@@ -123,23 +123,23 @@ These questions require fundamental knowledge of security concepts and are usual
 
 **What is Perfect Forward Secrecy?**
 
-    - past communication sessions remain secure and can't be decrypted retroactively if keys are compromised
+- past communication sessions remain secure and can't be decrypted retroactively if keys are compromised
 
-    - each session has unique, ephemeral keys for encryption.
+- each session has unique, ephemeral keys for encryption.
 
-    - derived through key exchange algos (DH or ECDH)
+- derived through key exchange algos (DH or ECDH)
 
-    - session keys not based on server's private key (used in SSL/TLS)
+- session keys not based on server's private key (used in SSL/TLS)
 
-    - commonly implemented in SSL/TLS protocols to secure web traffic
+- commonly implemented in SSL/TLS protocols to secure web traffic
 
-    - some implementations may use RSA
+- some implementations may use RSA
 
-    - ephemeral keys created for each session and discarded after session ends (no storage)
+- ephemeral keys created for each session and discarded after session ends (no storage)
 
-    - ephemeral keys created automatically during TLS handshake
+- ephemeral keys created automatically during TLS handshake
 
-    - edge cases:
+- edge cases:
 
         1. session key can be intercepted and used to decrypt current session
 
@@ -156,49 +156,49 @@ These questions require fundamental knowledge of security concepts and are usual
 
 **What are common ports involving security, what are the risks and mitigations?**
 
-    - **80 (HTTP)**: 
+- **80 (HTTP)**: 
 
         1. risk: unencrypted web traffic, intercepting/sniffing data
 
         2. mitigation: use HTTPS and implement HSTS (http strict transport security) to enforce secure connections
 
-    - **443 (HTTPS)**:
+- **443 (HTTPS)**:
 
         1. risk: vulnerable to misconfigured SSL/TLS, outdated encryption protocols, cipher suites
 
         2. mitigation: keep SSL/TLS certs updated, use strong encryption (TLS1.2/1.3), disable older protocols (SSLv3)
 
-    - **20, 21 (FTP)**:
+- **20, 21 (FTP)**:
 
         1. risk: data transmitted in plaintext, vulnerable to interception + unauthorized data access
 
         2. mitigation: use SFTP (ssh file transfer protocol) or FTPS (ftp secure) for encrypted transfers
 
-    - **22 (SSH)**: 
+- **22 (SSH)**: 
 
         1. risk: brute force target, attackers can gain shell access
 
         2. mitigation: strong passwords, key-based authentication, 2FA, change default port
 
-    - **23 (TELNET)**:
+- **23 (TELNET)**:
 
         1. risk: similar to FTP
 
         2. mitigation: replace with SSH
 
-    - **25 (SMTP)**:
+- **25 (SMTP)**:
 
         1. risk: can be exploited to send spam/phishing emails
 
         2. mitigation: use SMTPS (port 465) for secure emails, implement SPF (sender policy framework), DKIM (domainkeys identified mail), DMARC (domain based message authentication reporting conformance)
 
-    - **53 (DNS)**:
+- **53 (DNS)**:
 
         1. risk: DNS spoofing/poisoning can redirect traffic to malicious sites
 
         2. mitigation: use DNSSEC for verifying authenticity of DNS data
 
-    - **3389 (RDP)**:
+- **3389 (RDP)**:
 
         1. risk: target for brute force/credential stuffing, can grant full control
 
@@ -220,39 +220,39 @@ These questions require fundamental knowledge of security concepts and are usual
 
 **What is a subnet and how is it useful in security?**
 
-    - segmentation: dividing a larger network into smaller subnets, each subnet operates as a distinct network within the larger infrastructure
+- segmentation: dividing a larger network into smaller subnets, each subnet operates as a distinct network within the larger infrastructure
 
-    - IP addressing: range of IP addresses allocated within the network (subnet's network boundary)
+- IP addressing: range of IP addresses allocated within the network (subnet's network boundary)
 
-    - **subnet mask**: used to divide the IP addresses into a network and host component; defines network range within larger network
+- **subnet mask**: used to divide the IP addresses into a network and host component; defines network range within larger network
 
-    - scheme: contiguous IP addresses (class C: 192.168.1.0 - 192.168.1.255)
+- scheme: contiguous IP addresses (class C: 192.168.1.0 - 192.168.1.255)
 
-    - configured by routers and switches
+- configured by routers and switches
 
-    - VLANs often used with subnets to enhance network management + security
+- VLANs often used with subnets to enhance network management + security
 
-    - public vs. private: public subnets can interact with the internet, private subnets are for internal network resources
+- public vs. private: public subnets can interact with the internet, private subnets are for internal network resources
 
-    - security:
+- security:
 
         1. containment of threats
 
         2. reduced attack surface
 
-    - access:
+- access:
 
         1. subnets can have specific access controls
 
         2. enhanced monitoring
 
-    - compliance:
+- compliance:
 
         1. subnets help in segregrating sensitive data
 
         2. isolating critical servers/dbs -> exposure is limited
 
-    - edge cases:
+- edge cases:
 
         1. oversegmentation: network complexity -> difficult to manage
 
@@ -262,7 +262,7 @@ These questions require fundamental knowledge of security concepts and are usual
 
 **Explain the difference between TCP and UDP. Which is more secure and why?**
 
-    - **TCP**:
+- **TCP**:
 
         - connection oriented: establishes connection before transmission (3-way handshake)
 
@@ -274,7 +274,7 @@ These questions require fundamental knowledge of security concepts and are usual
 
         - subject to attacks like SYN flooding, SYNACK spoofing, session hijacking
 
-    - **UDP**:
+- **UDP**:
 
         - connectionless: sends packets (datagrams) independently
 
@@ -286,21 +286,21 @@ These questions require fundamental knowledge of security concepts and are usual
 
         - no built-in mechanism for integrity or authenticity
 
-   - What is the TCP three-way handshake?
+- What is the TCP three-way handshake?
 
          - view blog
 
 **What is the purpose of TLS?**
 
-    - encryption: established with a combination of symmetric and asymmetric cryptography.
+- encryption: established with a combination of symmetric and asymmetric cryptography.
 
-    - authentication: digital certificates used to ensure parties are authenticated
+- authentication: digital certificates used to ensure parties are authenticated
 
-    - integrity: mechanisms in place to ensure data has not been corrupted/altered during transmission
+- integrity: mechanisms in place to ensure data has not been corrupted/altered during transmission
 
-    - handshake: client and server negotiate crypto algos, key exchanges, authentications
+- handshake: client and server negotiate crypto algos, key exchanges, authentications
 
-    - record: protocol ensures data is encrypted + decrypted correctly, maintaining integrity
+- record: protocol ensures data is encrypted + decrypted correctly, maintaining integrity
 
     - versioning: each version enhances security
 
@@ -1096,7 +1096,7 @@ These questions are highly technical and require extensive knowledge and experie
 
 **How do cookies work? How do sessions work?**
 
-    **cookies**:
+**cookies**:
 
         - small pieces of data stored on client's browser
 
@@ -1130,7 +1130,7 @@ These questions are highly technical and require extensive knowledge and experie
 
         - mitigation through setting `HttpOnly`, `Secure`, `SameSite`
 
-    **sessions**:
+**sessions**:
 
         - store data on server-side, linked to unique session ID
 
@@ -1154,7 +1154,7 @@ These questions are highly technical and require extensive knowledge and experie
 
             - secure session data storage + retrieval
 
-    **cookies + sessions**:
+**cookies + sessions**:
 
         - cookies (with session IDs) and sessions work together to maintain state/user data
 
@@ -1913,162 +1913,209 @@ How would you go about reverse-engineering a custom protocol packet?
 
 **If left alone in office with access to a computer, how would you exploit it?**
 
-    1. initial access: 
+1. initial access: 
 
-        - physical (unattended, unlocked, passwords nearby)
+    - physical (unattended, unlocked, passwords nearby)
 
-        - usb (malicious software, keyloggers, backdoors)
+    - usb (malicious software, keyloggers, backdoors)
 
-    2. network exploitation
+2. network exploitation
 
-        - network sniffing tools to capture data over network (if network is unsecured)
+    - network sniffing tools to capture data over network (if network is unsecured)
 
-    3. known vulns
+3. known vulns
 
-        - outdated software, unpatched systems
+    - outdated software, unpatched systems
 
-        - weak passwords (default passwords, dictionaries)
+    - weak passwords (default passwords, dictionaries)
 
-    4. social engineering
+4. social engineering
 
-        - phishing attacks against other employees
+    - phishing attacks against other employees
 
-    5. privilege escalation
+5. privilege escalation
 
-        - exploiting user permissions: if logged-in user has admin privs, attacker can install software, access restricted data, create backdoors
+    - exploiting user permissions: if logged-in user has admin privs, attacker can install software, access restricted data, create backdoors
 
 
 **You have a pipeline for Docker images. How would you design everything to ensure the proper security checks?**
 
-    1. dev
+1. dev
 
-        - secure base images
+    - secure base images
 
-            - official and minimal base images to reduce attack surfaces
+        - official and minimal base images to reduce attack surfaces
 
-            - regularly update base images to include latest security patches
+        - regularly update base images to include latest security patches
 
-        - code analysis
+    - code analysis
 
-            - static code analysis tools to detect security vulnerabilities and bad practices in app code
+        - static code analysis tools to detect security vulnerabilities and bad practices in app code
 
-    2. build
+2. build
 
-        - automated vuln scanning
+    - automated vuln scanning
 
-            - vuln scanning tools (Clair/Anchore/Trivy) in CI/CD pipeline to automatically scan docker images
+        - vuln scanning tools (Clair/Anchore/Trivy) in CI/CD pipeline to automatically scan docker images
 
-            - scan both OS packages and app dependencies
+        - scan both OS packages and app dependencies
 
-        - image hardening
+    - image hardening
 
-            - remove unnecessary tools, files, privs from images
+        - remove unnecessary tools, files, privs from images
 
-            - follow least privilege principle for app/user perms within container
+        - follow least privilege principle for app/user perms within container
 
-        - secrets management
+    - secrets management
 
-            - avoid hardcoding secrets in images
+        - avoid hardcoding secrets in images
 
-            - use secrets management tools (HashiCorp Vault, AWS Secrets Manager, Docker Secrets)
+        - use secrets management tools (HashiCorp Vault, AWS Secrets Manager, Docker Secrets)
 
-    3. ci/cd pipeline
+3. ci/cd pipeline
 
-        - pipeline security
+    - pipeline security
 
-            - RBAC to determine who can modify pipeline and deploy images
+        - RBAC to determine who can modify pipeline and deploy images
 
-            - sign + verify images using Docker Content Trust
+        - sign + verify images using Docker Content Trust
 
-        - automated testing
+    - automated testing
 
-            - automated security testing and config checks in ci/cd process
+        - automated security testing and config checks in ci/cd process
 
-            - perform DAST and integration testing to detect runtime vulns and config issues
+        - perform DAST and integration testing to detect runtime vulns and config issues
 
-    4. deployment
+4. deployment
 
-        - runtime security
+    - runtime security
 
-            - container orchestration tools (Kubernetes) with security policies (Pod Security Policies) to manage container deployments securely
+        - container orchestration tools (Kubernetes) with security policies (Pod Security Policies) to manage container deployments securely
 
-            - implement network segmentation + firewall rules to control traffic to/from containers
+        - implement network segmentation + firewall rules to control traffic to/from containers
 
-        - monitoring + logging
+    - monitoring + logging
 
-            - monitor container runtime envs for anomalous activities (Falco, Sysdig)
+        - monitor container runtime envs for anomalous activities (Falco, Sysdig)
 
-            - comprehensive logging of container activities for future audits + investigations
+        - comprehensive logging of container activities for future audits + investigations
 
-    5. continuous monitoring + updating
+5. continuous monitoring + updating
 
-        - regular scanning
+    - regular scanning
 
-            - continuously scan deployed containers/host envs for vulns
+        - continuously scan deployed containers/host envs for vulns
 
-            - regularly update containers/hosts with latest security patches
+        - regularly update containers/hosts with latest security patches
 
-        - IR plan
+    - IR plan
 
-            - develop/maintain an IR plan specific to containerized envs
+        - develop/maintain an IR plan specific to containerized envs
 
-            - conduct regular security training/drills for team
+        - conduct regular security training/drills for team
 
-    6. documentation + compliance
+6. documentation + compliance
 
-        - document best practices
+    - document best practices
 
-        - compliance checks
+    - compliance checks
 
 
 **How would you create a secret storage system?**
 
-    - define purpose + required security level
+- define purpose + required security level
 
-    - assess risk + compliance requirements (risks, threats, GDPR, HIPAA)
+- assess risk + compliance requirements (risks, threats, GDPR, HIPAA)
 
-    - encryption: AES-256 to encrypt data at rest, encrypt individual files as well as entire storage
+- encryption: AES-256 to encrypt data at rest, encrypt individual files as well as entire storage
 
-    - access control: MFA, user roles/permissions
+- access control: MFA, user roles/permissions
 
-    - secure transmission: encryption during transit (TLS/SSL)
+- secure transmission: encryption during transit (TLS/SSL)
 
-    - integrity: hash functions to verify data has not been tampered with
+- integrity: hash functions to verify data has not been tampered with
 
-    - backup/redundancy: regular backups, RAID configurations to protect against data loss
+- backup/redundancy: regular backups, RAID configurations to protect against data loss
 
-    - physical security: locks, secure location
+- physical security: locks, secure location
 
-    - regular audits/monitoring
+- regular audits/monitoring
 
-    - updates + patch management
+- updates + patch management
 
-    - user education
+- user education
 
-    - contingency/disaster recovery plan
+- contingency/disaster recovery plan
 
 
 **How would you harden your work laptop if you needed it at Defcon?**
 
-    - OS hardening: update/patch, remove unnecessary services/software, use secure OS
+- OS hardening: update/patch, remove unnecessary services/software, use secure OS
 
-    - network: firewall, VPN, avoid public wifi
+- network: firewall, VPN, avoid public wifi
 
-    - UAC: strong auth (strong passwords, MFA), least privilege principle (avoid admin account), guest account (non-admin guest account)
+- UAC: strong auth (strong passwords, MFA), least privilege principle (avoid admin account), guest account (non-admin guest account)
 
-    - physical: disk encryption (bitlocker/filevault), secure boot in BIOS (prevent unauth'd bootable systems), physical lock for laptop 
+- physical: disk encryption (bitlocker/filevault), secure boot in BIOS (prevent unauth'd bootable systems), physical lock for laptop 
 
-    - data: backups, data encryption (encrypted containers like veracrypt)
+- data: backups, data encryption (encrypted containers like veracrypt)
 
-    - endpoint: AV/AM, IDS
+- endpoint: AV/AM, IDS
 
-    - browser: uldated browser with extensions (uBlock, HTTPS Everywhere), disable unnecessary plugins
+- browser: uldated browser with extensions (uBlock, HTTPS Everywhere), disable unnecessary plugins
 
-    - misc: disable bluetooth/NFC, vigilance (phishing, social engineering, unknown USB/peripherals)
+- misc: disable bluetooth/NFC, vigilance (phishing, social engineering, unknown USB/peripherals)
 
 
 **If you had to set up supply chain attack prevention, how would you do that?**
 
+- these attacks target less-secure elements in the supply chain to compromise final product/service
+
+- this involves tampering with software components, exploiting 3rd-party services, hardware manipulations
+
+- identify vulns:
+    
+    - conduct thorough assessment of all components in supply chain (software, hardware, 3rd party services)
+
+    - identify potential weak points
+
+- strengthen software supply chain
+
+    1. secure SDLC
+        
+        - implement security practices throughout SDLC (code reviews, security testing, automated vuln scanning)
+
+    2. 3rd party component management
+
+        - regular audit/monitor 3rd party components for vulns
+
+    3. patch management
+
+- vendor management
+
+    1. vendor risk assessment
+
+    2. audits
+
+- enhance hardware security
+
+    1. secure hardware procurement
+
+    2. tamper detection measures
+
+- network + access control
+
+    1. segmentation + monitoring
+
+    2. access control
+
+- continuous monitoring + IR
+
+    1. real-time monitoring
+
+    2. IR plan
+
+- industry collaboration
 
 ## 6. Programming and Code
 
@@ -2081,7 +2128,7 @@ How would you go about reverse-engineering a custom protocol packet?
 
 **Can I write a tool that would search our Github repos for secrets, keys, etc.? AWS?**
 
-    **github**:
+**github**:
 
         1. define search criteria (API keys, db creds, ssh keys, private tokens)
 
@@ -2129,7 +2176,7 @@ How would you go about reverse-engineering a custom protocol packet?
             main()
         ```
         
-    **AWS**
+**AWS**
 
         1. AWS API/SDK: authenticate using IAM roles
 
@@ -2142,7 +2189,7 @@ How would you go about reverse-engineering a custom protocol packet?
 
         5. integration with cloudtrail: use cloudtrail logs to monitor for unusual access patterns
 
-    considerations:
+considerations:
 
         - rate limiting + API quotas
 
