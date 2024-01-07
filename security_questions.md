@@ -43,82 +43,82 @@ These questions require fundamental knowledge of security concepts and are usual
     
 **symmetric**:
 
-    - single key: same key for encryption + decryption. key must be shared and kept secret.
+- single key: same key for encryption + decryption. key must be shared and kept secret.
 
-    - key distribution problem
+- key distribution problem
 
-    - faster than asymmetric encryption (suitable for encrypting large volumes of data)
+- faster than asymmetric encryption (suitable for encrypting large volumes of data)
 
-    - common algos include AES, DES, 3DES
+- common algos include AES, DES, 3DES
 
-    - data at rest: ideal for encrypting stored data (like db contents)
+- data at rest: ideal for encrypting stored data (like db contents)
 
-    - data in transit: used within secure channels (after key exchange) for encrypting data in transit
+- data in transit: used within secure channels (after key exchange) for encrypting data in transit
 
-    - edge cases:
+- edge cases:
 
-        1. compromise: all data at risk if key is compromised
+    1. compromise: all data at risk if key is compromised
 
-        2. scalability: managing keys with many users is complex
+    2. scalability: managing keys with many users is complex
     
 **asymmetric**:
 
-    - key pair: public key (can be shared) + private key (secret)
+- key pair: public key (can be shared) + private key (secret)
 
-    - public key is freely distributed, eliminating key distribution problem
+- public key is freely distributed, eliminating key distribution problem
 
-    - slower (computational complexity), less efficient for large volumes
+- slower (computational complexity), less efficient for large volumes
 
-    - common algos include RSA, ECC, DH
+- common algos include RSA, ECC, DH
 
-    - ensures authenticity (digital signatures)
+- ensures authenticity (digital signatures)
 
-    - used to securely exchange symmetric keys for encrypted comms (SSL/TLS).
+- used to securely exchange symmetric keys for encrypted comms (SSL/TLS).
 
-    - edge cases:
+- edge cases:
 
-        1. key length: short keys vulnerable to attacks, longer keys require more processing power
+    1. key length: short keys vulnerable to attacks, longer keys require more processing power
         
-        2. quantum: more vulnerable to quantum computing attacks compared to symmetric keys.
+    2. quantum: more vulnerable to quantum computing attacks compared to symmetric keys.
 
 
 **What’s the difference between Diffie-Hellman and RSA?**
     
 **DH**:
     
-    - used for securely exchanging crypto keys over a public channel
+- used for securely exchanging crypto keys over a public channel
 
-    - not used for encryption or signing, only for establishing a shared secret
+- not used for encryption or signing, only for establishing a shared secret
 
-    - allows 2 parties to generate a public-private key pair and then use their private key and the other's public key to create a shared secret
+- allows 2 parties to generate a public-private key pair and then use their private key and the other's public key to create a shared secret
 
-    - discrete logarithm problem: difficult to deduce the shared secret even if public keys are known.
+- discrete logarithm problem: difficult to deduce the shared secret even if public keys are known.
 
-    - does not provide encryption/decryption functionality
+- does not provide encryption/decryption functionality
 
-    - forward secrecy: compromise of long-term keys does not compromise past session keys
+- forward secrecy: compromise of long-term keys does not compromise past session keys
 
-    - edge cases:
+- edge cases:
 
-        1. MITM: if initial public keys are not authenticated
+    1. MITM: if initial public keys are not authenticated
 
-        2. quantum computing attacks
+    2. quantum computing attacks
 
 **RSA**:
 
-    - encryption of data and digital signatures
+- encryption of data and digital signatures
 
-    - key pair (public + private key)
+- key pair (public + private key)
 
-    - large prime number factorization (intense and secure)
+- large prime number factorization (intense and secure)
 
-    - larger key sizes -> slower performance
+- larger key sizes -> slower performance
 
-    - edge cases:
+- edge cases:
 
-        1. key generation: proper generation of large prime numbers required
+    1. key generation: proper generation of large prime numbers required
 
-        2. quantum computing attacks
+    2. quantum computing attacks
 
 
 **What is Perfect Forward Secrecy?**
@@ -141,15 +141,15 @@ These questions require fundamental knowledge of security concepts and are usual
 
 - edge cases:
 
-        1. session key can be intercepted and used to decrypt current session
+    1. session key can be intercepted and used to decrypt current session
 
-        2. more resource intensive than using static keys
+    2. more resource intensive than using static keys
 
-        3. using weak RNG can make ephemeral keys predictable
+    3. using weak RNG can make ephemeral keys predictable
 
-        4. not all protocols/cipher suites support PFS
+    4. not all protocols/cipher suites support PFS
 
-        5. quantum attacks
+    5. quantum attacks
 
 
 ## 2. Network Level and Logging
@@ -158,63 +158,63 @@ These questions require fundamental knowledge of security concepts and are usual
 
 - **80 (HTTP)**: 
 
-        1. risk: unencrypted web traffic, intercepting/sniffing data
+    1. risk: unencrypted web traffic, intercepting/sniffing data
 
-        2. mitigation: use HTTPS and implement HSTS (http strict transport security) to enforce secure connections
+    2. mitigation: use HTTPS and implement HSTS (http strict transport security) to enforce secure connections
 
 - **443 (HTTPS)**:
 
-        1. risk: vulnerable to misconfigured SSL/TLS, outdated encryption protocols, cipher suites
+    1. risk: vulnerable to misconfigured SSL/TLS, outdated encryption protocols, cipher suites
 
-        2. mitigation: keep SSL/TLS certs updated, use strong encryption (TLS1.2/1.3), disable older protocols (SSLv3)
+    2. mitigation: keep SSL/TLS certs updated, use strong encryption (TLS1.2/1.3), disable older protocols (SSLv3)
 
 - **20, 21 (FTP)**:
 
-        1. risk: data transmitted in plaintext, vulnerable to interception + unauthorized data access
+    1. risk: data transmitted in plaintext, vulnerable to interception + unauthorized data access
 
-        2. mitigation: use SFTP (ssh file transfer protocol) or FTPS (ftp secure) for encrypted transfers
+    2. mitigation: use SFTP (ssh file transfer protocol) or FTPS (ftp secure) for encrypted transfers
 
 - **22 (SSH)**: 
 
-        1. risk: brute force target, attackers can gain shell access
+    1. risk: brute force target, attackers can gain shell access
 
-        2. mitigation: strong passwords, key-based authentication, 2FA, change default port
+    2. mitigation: strong passwords, key-based authentication, 2FA, change default port
 
 - **23 (TELNET)**:
 
-        1. risk: similar to FTP
+    1. risk: similar to FTP
 
-        2. mitigation: replace with SSH
+    2. mitigation: replace with SSH
 
 - **25 (SMTP)**:
 
-        1. risk: can be exploited to send spam/phishing emails
+    1. risk: can be exploited to send spam/phishing emails
 
-        2. mitigation: use SMTPS (port 465) for secure emails, implement SPF (sender policy framework), DKIM (domainkeys identified mail), DMARC (domain based message authentication reporting conformance)
+    2. mitigation: use SMTPS (port 465) for secure emails, implement SPF (sender policy framework), DKIM (domainkeys identified mail), DMARC (domain based message authentication reporting conformance)
 
 - **53 (DNS)**:
 
-        1. risk: DNS spoofing/poisoning can redirect traffic to malicious sites
+    1. risk: DNS spoofing/poisoning can redirect traffic to malicious sites
 
-        2. mitigation: use DNSSEC for verifying authenticity of DNS data
+    2. mitigation: use DNSSEC for verifying authenticity of DNS data
 
 - **3389 (RDP)**:
 
-        1. risk: target for brute force/credential stuffing, can grant full control
+    1. risk: target for brute force/credential stuffing, can grant full control
 
-        2. mitigation: use VPNs, enable NLA (network level auth), limit RDP via firewalls
+    2. mitigation: use VPNs, enable NLA (network level auth), limit RDP via firewalls
 
     extra:
 
-        - change default ports to non standard ports
+    - change default ports to non standard ports
 
-        - configure firewalls to restrict access to necessary ports
+    - configure firewalls to restrict access to necessary ports
 
-        - regular security audits + monitor network traffic
+    - regular security audits + monitor network traffic
 
-        - software + firmware updates
+    - software + firmware updates
 
-        - network segmentation
+    - network segmentation
 
 
 
@@ -236,59 +236,74 @@ These questions require fundamental knowledge of security concepts and are usual
 
 - security:
 
-        1. containment of threats
+    1. containment of threats
 
-        2. reduced attack surface
+    2. reduced attack surface
 
 - access:
 
-        1. subnets can have specific access controls
+    1. subnets can have specific access controls
 
-        2. enhanced monitoring
+    2. enhanced monitoring
 
 - compliance:
 
-        1. subnets help in segregrating sensitive data
+    1. subnets help in segregrating sensitive data
 
-        2. isolating critical servers/dbs -> exposure is limited
+    2. isolating critical servers/dbs -> exposure is limited
 
 - edge cases:
 
-        1. oversegmentation: network complexity -> difficult to manage
+    1. oversegmentation: network complexity -> difficult to manage
 
-        2. cross-subnet access: misconfigured access controls -> unauthorized access
+    2. cross-subnet access: misconfigured access controls -> unauthorized access
 
-        3. VPN: understanding how VPNs interact with subnets
+    3. VPN: understanding how VPNs interact with subnets
 
 **Explain the difference between TCP and UDP. Which is more secure and why?**
 
 - **TCP**:
 
-        - connection oriented: establishes connection before transmission (3-way handshake)
+    - connection oriented: establishes connection before transmission (3-way handshake)
 
-        - reliable delivery: all packets must be delivered accurately and in the correct order (packet sequencing, acknowledgements, retransmission of lost packets)
+    - reliable delivery: all packets must be delivered accurately and in the correct order (packet sequencing, acknowledgements, retransmission of lost packets)
 
-        - applications where reliability and order are crucial (HTTPS, FTP, SMTP)
+    - applications where reliability and order are crucial (HTTPS, FTP, SMTP)
 
-        - more secure than UDP (establishes connection and confirms packet delivery)
+    - more secure than UDP (establishes connection and confirms packet delivery)
 
-        - subject to attacks like SYN flooding, SYNACK spoofing, session hijacking
+    - subject to attacks like SYN flooding, SYNACK spoofing, session hijacking
 
 - **UDP**:
 
-        - connectionless: sends packets (datagrams) independently
+    - connectionless: sends packets (datagrams) independently
 
-        - unreliable delivery: no acknowledgement, retransmission. no guarantee of delivery, order, integrity
+    - unreliable delivery: no acknowledgement, retransmission. no guarantee of delivery, order, integrity
 
-        - applications where speed > reliability (video streaming, online gaming, VoIP)
+    - applications where speed > reliability (video streaming, online gaming, VoIP)
 
-        - less secure than TCP (susceptible to spoofing/reflection attacks eg: send UDP packets with a forged IP address, leading to a reflection attack)
+    - less secure than TCP (susceptible to spoofing/reflection attacks eg: send UDP packets with a forged IP address, leading to a reflection attack)
 
-        - no built-in mechanism for integrity or authenticity
+    - no built-in mechanism for integrity or authenticity
 
 - What is the TCP three-way handshake?
 
-         - view blog
+    1. SYN (synchronize):
+
+    - the client sends a TCP packet with the SYN flag set to the server.
+
+    - the packet indicates an initiation of a connection request and contains an ISN (initial sequence number) generated by the client.
+
+    - the client asks the server to acknowledge (ACK) this sequence number.
+    
+    2. SYN-ACK (synchronize-acknowledge)
+    - the server then responds with a TCP packet that has both SYN and ACK flags set.
+    - this acknowledges the client’s sequence number and also contains the server’s own ISN.
+    
+    3. ACK (acknowledge)
+    - the client then sends a final ACK packet to acknowledge the client’s ISN.
+    - this completes the handshake, and both parties now exchange data, in both directions.
+
 
 **What is the purpose of TLS?**
 
@@ -312,11 +327,11 @@ These questions require fundamental knowledge of security concepts and are usual
 
     challenges:
 
-        - misconfigured TLS (outdated protocols, weak ciphers)
+    - misconfigured TLS (outdated protocols, weak ciphers)
 
-        - cert management: expired, revoked, untrusted certs can compromise security
+    - cert management: expired, revoked, untrusted certs can compromise security
 
-        - compatibility with older versions
+    - compatibility with older versions
 
 **Difference between IPS and IDS?**
 
@@ -357,151 +372,154 @@ These questions require fundamental knowledge of security concepts and are usual
 
 **What is a firewall? How does it work?**
 
-    - traffic filtering: examines and filters traffic (incoming/outgoing) based on predefined rules
+- traffic filtering: examines and filters traffic (incoming/outgoing) based on predefined rules
 
-    - packet filtering: inspects packets at network layer (source/dest IP, port numbers, protocols)
+- packet filtering: inspects packets at network layer (source/dest IP, port numbers, protocols)
 
-    - stateful inspection: tracks state of active connections, makes decisions based on context (stateful firewall)
+- stateful inspection: tracks state of active connections, makes decisions based on context (stateful firewall)
 
-    - application layer: inspects traffic at application layer and makes more sophisticated decisions based on context
+- application layer: inspects traffic at application layer and makes more sophisticated decisions based on context
 
-    - hardware: physical devices placed between network and gateway
+- hardware: physical devices placed between network and gateway
 
-    - software: installed on individual servers/devices
+- software: installed on individual servers/devices
 
-    - cloud: cloud service, protects cloud infrastructure
+- cloud: cloud service, protects cloud infrastructure
 
-    - rules: based on security policy
+- rules: based on security policy
 
-    - network security
+- network security
 
-    - access control
+- access control
 
-    - monitoring + logging
+- monitoring + logging
 
-    challenges:
+challenges:
 
-        - configuration
+    - configuration
 
-        - performance impact
+    - performance impact
 
-        - evolving threats
+    - evolving threats
 
-        - 0-day attacks
+    - 0-day attacks
 
 
 ## 3. OWASP Top 10, Pentesting, and/or Web Applications
 
 **Differentiate XSS from CSRF**
 
-    - **XSS**:
+- **XSS**:
 
-        - involves injecting malicious scripts into pages viewed by other users
+    - involves injecting malicious scripts into pages viewed by other users
 
-        - runs in the context of the target browser, allowing attacker to steal cookies, session tokens, etc.
+    - runs in the context of the target browser, allowing attacker to steal cookies, session tokens, etc.
 
-        - stored XSS: malicious script stored on server (db), executed when user accesses compromised page
+    - stored XSS: malicious script stored on server (db), executed when user accesses compromised page
 
-        - reflected XSS: script is not stored but reflected off a web server, through URL or form input
+    - reflected XSS: script is not stored but reflected off a web server, through URL or form input
 
-        - DOM XSS: occurs within DOM, doesn't need to interact with server for execution
+    - DOM XSS: occurs within DOM, doesn't need to interact with server for execution
 
-        - can lead to information theft, session hijacking, manipulate or deface web content
+    - can lead to information theft, session hijacking, manipulate or deface web content
 
-        - mitigation:
+    - mitigation:
 
-            1. sanitization of user inputs
+        1. sanitization of user inputs
 
-            2. CSP headers to restrict sources of executable script
+        2. CSP headers to restrict sources of executable script
 
-            3. encode data output to treat it as data, not executable code
+        3. encode data output to treat it as data, not executable code
 
-    - **CSRF**:
+- **CSRF**:
 
-        - tricks a browser into executing an unwanted action on a site where they're authenticated
+    - tricks a browser into executing an unwanted action on a site where they're authenticated
 
-        - attacker might send link/form that causes authenticated user to submit a request to another site where they're logged in
+    - attacker might send link/form that causes authenticated user to submit a request to another site where they're logged in
 
-        - can result in unauthorized actions performed on behalf of user (breaches, compromise)
+    - can result in unauthorized actions performed on behalf of user (breaches, compromise)
 
-        - mitigation:
+    - mitigation:
 
-            1. anti-CSRF tokens in forms, validate requests
+        1. anti-CSRF tokens in forms, validate requests
 
-            2. same-origin policy restrictions in browsers
+        2. same-origin policy restrictions in browsers
 
-            3. strict session management like re-auth for critical actions
+        3. strict session management like re-auth for critical actions
 
-    - XSS directly affects UX, CSRF exploits authenticated session without knowledge
+- XSS directly affects UX, CSRF exploits authenticated session without knowledge
 
-    - XSS exploits trust in a website, CSRF exploits trust a website has in a browser
+- XSS exploits trust in a website, CSRF exploits trust a website has in a browser
 
-    - XSS: script runs within context of browser
+- XSS: script runs within context of browser
 
-    - CSRF: attack executed at server level, manipulating server into performing actions
+- CSRF: attack executed at server level, manipulating server into performing actions
 
-    - prevention:
+- prevention:
 
-        1. XSS: treat user input as untrusted and handle it carefully
+    1. XSS: treat user input as untrusted and handle it carefully
 
-        2. CSRF: ensure every request is genuinely intended by user, through unique tokens
+    2. CSRF: ensure every request is genuinely intended by user, through unique tokens
 
 
 **What is a Server-Side Request Forgery attack?**
 
-    - attacker induces server to make request to unintended location, often internal systems
+- attacker induces server to make request to unintended location, often internal systems
 
-    - typically achieved by manipulating URLs/HTTP requests
+- typically achieved by manipulating URLs/HTTP requests
 
-    - might target internal dbs, cloud services, APIs that are accessible from server's network
+- might target internal dbs, cloud services, APIs that are accessible from server's network
 
-    - also used to interact with services running on localhost
+- also used to interact with services running on localhost
 
-    - exploitation occurs through vulnerable web apps that don't validate user supplied URLs or inputs in making backend requests
+- exploitation occurs through vulnerable web apps that don't validate user supplied URLs or inputs in making backend requests
 
-    - can lead to exposure of sensitive data
+- can lead to exposure of sensitive data
 
-    - map internal network architecture, identify internal services, other exploitable vulns
-    - DoS
+- map internal network architecture, identify internal services, other exploitable vulns
 
-    - RCE: when SSRF is combined with other vulns
+- DoS
 
-    - mitigation:
+- RCE: when SSRF is combined with other vulns
 
-        1. input validation
+- mitigation:
 
-        2. whitelist allowed resources and deny others
+    1. input validation
 
-        3. limit server's access to internal resources (strict firewall rules, segmentation)
+    2. whitelist allowed resources and deny others
 
-        4. review + update configurations of apps and servers to avoid misconfigs
+    3. limit server's access to internal resources (strict firewall rules, segmentation)
 
-        5. monitor + log outbound requests
+    4. review + update configurations of apps and servers to avoid misconfigs
+
+    5. monitor + log outbound requests
 
 
-**What is Same Origin Policy and CORS?**
+**What is Same Origin Policy and CORS (Cross-Origin Resource Sharing)?**
 
-    - **SOP**:
+- **SOP**:
 
-        - restricts web pages from making requests to different domains than the one that served the web page
+    - restricts web pages from making requests to different domains than the one that served the web page
 
-        - prevents malicious scripts on one page from obtaining access to sensitive data on another page
+    - prevents malicious scripts on one page from obtaining access to sensitive data on another page
 
-        - origin defined by scheme (protocol), host (domain), and port of URL
+    - origin defined by scheme (protocol), host (domain), and port of URL
 
-        - webpage can only request resources from the same origin, unless exceptions explicitly allowed
+    - webpage can only request resources from the same origin, unless exceptions explicitly allowed
 
-        - without specific perms, scripts from one origin can't read data from or write data to another origin (preventing XSS)
+    - without specific perms, scripts from one origin can't read data from or write data to another origin (preventing XSS)
 
-    - **CORS**:
+- **CORS**:
 
-        - allows restricted resources on webpage to be requested from another domain
+    - allows restricted resources on webpage to be requested from another domain
 
-        - relaxes the SOP for specific scenarios (flexible web apps)
+    - relaxes the SOP for specific scenarios (flexible web apps)
 
-        - server specifies (through HTTP headers) who can access resources and how (methods, headers, credentials, etc)
+    - server specifies (through HTTP headers) who can access resources and how (methods, headers, credentials, etc)
 
-        - preflight requests: check if server permits actual requests
+    - preflight requests: check if server permits actual requests
+
+- **SOP vs CORS**:
 
     - SOP is a fundamental security model (isolating different origins) and CORS is a controlled way to relax SOP
 
@@ -519,201 +537,359 @@ These questions require fundamental knowledge of security concepts and are usual
 
 **What are the 6 aggregate functions of SQL?**
 
-    1. `count()`: number of rows matching a criterion
+1. `count()`: number of rows matching a criterion
 
-        - eg: `SELECT COUNT(*) FROM Customers;` returns number of customers in table
+    - eg: `SELECT COUNT(*) FROM Customers;` returns number of customers in table
 
-    2. `sum()`: adds up values in column
+2. `sum()`: adds up values in column
 
-        - eg: `SELECT SUM(SaleAmount) FROM Sales;` returns total sales amount from table
+    - eg: `SELECT SUM(SaleAmount) FROM Sales;` returns total sales amount from table
 
-    3. `avg()`: average value of specified column
+3. `avg()`: average value of specified column
 
-        - eg: `SELECT AVG(Price) FROM Products;` returns average price of products from table
+    - eg: `SELECT AVG(Price) FROM Products;` returns average price of products from table
 
-    4. `max()`: highest value
+4. `max()`: highest value
 
-        - `SELECT MAX(Score) FROM TestResults;` returns highest score from table
+    - `SELECT MAX(Score) FROM TestResults;` returns highest score from table
 
-    5. `min()`: lowest value
+5. `min()`: lowest value
 
-        - `SELECT MIN(Score) FROM TestResults;` returns lowest score from table
+    - `SELECT MIN(Score) FROM TestResults;` returns lowest score from table
 
-    6. `group_concat()`:
+6. `group_concat()`:
 
-        - concatenates values from column into a single string, using a delimiter
+    - concatenates values from column into a single string, using a delimiter
 
-        - `SELECT GROUP_CONCAT(Name) FROM Employees;` returns single string of employee names concatenated together
+    - `SELECT GROUP_CONCAT(Name) FROM Employees;` returns single string of employee names concatenated together
 
-    considerations:
+considerations:
 
-        - except for `count(*)`, these functions ignore null values
+- except for `count(*)`, these functions ignore null values
 
-        - resource-intensive on large datasets
+- resource-intensive on large datasets
 
-        - often used with `GROUP BY` to aggregate data within specific categories
+- often used with `GROUP BY` to aggregate data within specific categories
 
 
 ## 5. Tools and Games
 
-   - What is the difference between nmap -ss and nmap -st?
+**What is the difference between `nmap -ss` and `nmap -st`?**
 
-   - How would you filter xyz in Wireshark?
+- **`nmap -ss`**:
+
+    - SYN scan aka stealth scan
+
+    - less intrusive, more discreet
+
+    - sends a SYN packet (part of TCP handshake process) to target port
+
+    - if target port is open, responds with SYN-ACK packet
+
+    - nmap sends RST (Reset) packet, closing connection before handshake is completed
+
+    - less likely to be logged by IDS (doesn't complete handshake)
+
+    - faster than `nmap -st`
+
+    - commonly used for quick, less detectable network recon
+
+    - requires root/admin privs (involves crafting raw packets)
+
+- **`nmap -st`**:
+
+    - TCP Connect Scan
+
+    - performs full handshake process
+
+    - nmap attempts to establish complete connection (SYN -> SYN-ACK -> ACK) with target port
+
+    - port is considered open if connection successfully established, then nmap closes connection
+
+    - doesn't require root/admin (uses system's TCP stack)
+
+    - logs on the target system + firewalls will show the connection and detect it
+
+    - used for more thorough and compliant scan (stealth not a priority)
+
+    - ideal in environments where user doesn't have privs
+
+**How would you filter "xyz" in Wireshark?**
+
+1. open wireshark + start capture (or open saved .pcap)
+
+2. apply display filter
+    
+    - write display filter in filter bar at the top
+
+    - filter for string "xyz" using `data contains "xyz"`
+
+    - filter will show all packets where data portion contains sequence "xyz"
+
+3. refining the filter
+
+    - if you know the specific protocol/context, you can refine the filter
+
+    - example: `http.request.uri contains "xyz"`
+
+    - this filters for HTTP requests with URIs containing "xyz"
+
+4. apply the filter
+
+    - press `Enter` or click arrow button next to filter bar
+
+    - wireshark updates packet list to show only those packets matching filter criteria
+
+5. analyze filtered packets
+
+    - once filtered, you can click on individual packets to view details and verify
 
 **What is the difference between tcp dump and FWmonitor?**
 
-    - **tcpdump**:
+- **tcpdump**:
 
-        - command-line packet analyzer
+    - command-line packet analyzer
 
-        - users can capture/display TCP/IP and other packets being transmitted/received over a network
+    - users can capture/display TCP/IP and other packets being transmitted/received over a network
 
-        - captures packets at network interface level
+    - captures packets at network interface level
 
-        - can filter traffic to show specific packets
+    - can filter traffic to show specific packets
 
-        - can be used on almost all *nix OS
+    - can be used on almost all *nix OS
 
-        - go-to tool for network debugging
+    - go-to tool for network debugging
 
-        - provides detailed information about network packets (source/dest IP address, packet size, timestamp, protocol)
+    - provides detailed information about network packets (source/dest IP address, packet size, timestamp, protocol)
 
-        - lacks UI
+    - lacks UI
 
-        - significant system resources
+    - significant system resources
 
-    - **FWmonitor**:
+- **FWmonitor**:
 
-        - specific to check point firewalls
+    - specific to check point firewalls
 
-        - used to inspec and debug traffic passing through check point firewall modules
+    - used to inspec and debug traffic passing through check point firewall modules
 
-        - designed to capture and display packets specifically handled by check point firewall processes and components
+    - designed to capture and display packets specifically handled by check point firewall processes and components
 
-        - allows admins to see how packets are affected by rules
+    - allows admins to see how packets are affected by rules
 
-        - check point firewall centric
+    - check point firewall centric
 
-        - useful for firewall admins and less for general network troubleshooting
+    - useful for firewall admins and less for general network troubleshooting
 
 
 ## 6. Programming and Code
 
 **How can Github webhooks (automating workflows for repo events) be used in a malicious way?**
 
-    1. unauthorized webhook creation
+1. unauthorized webhook creation
 
-        - attacker gains write access to repo (compromised creds or perm misconfigs) and creates webhook
+    - attacker gains write access to repo (compromised creds or perm misconfigs) and creates webhook
 
-        - webhook points to malicious server
+    - webhook points to malicious server
 
-        - when repo triggers webhook (eg: push event), it sends repo data to attacker's server
+    - when repo triggers webhook (eg: push event), it sends repo data to attacker's server
 
-    2. interception + manipulation of webhook data
+2. interception + manipulation of webhook data
 
-        - webhooks not using HTTPS or lacking proper validation can be intercepted
+    - webhooks not using HTTPS or lacking proper validation can be intercepted
 
-        - attacker could intercept webhook requests, read sensitive data, manipulate payload before it reaches intended destination
+    - attacker could intercept webhook requests, read sensitive data, manipulate payload before it reaches intended destination
 
-    3. DDoS
+3. DDoS
 
-        - attacker creates multiple webhooks in a repo or access various repos to trigger massive amount of traffic to target server
+    - attacker creates multiple webhooks in a repo or access various repos to trigger massive amount of traffic to target server
 
-        - webhooks can be config'd to all trigger simultaneously (eg: common event)
+    - webhooks can be config'd to all trigger simultaneously (eg: common event)
 
-    4. code injection
+4. code injection
 
-        - webhook set up to trigger CI/CD pipeline or execute script on server
+    - webhook set up to trigger CI/CD pipeline or execute script on server
 
-        - if webhook payload or receiving script is not securely coded, it could be exploited to execute malicious code on server running the CI/CD pipeline
+    - if webhook payload or receiving script is not securely coded, it could be exploited to execute malicious code on server running the CI/CD pipeline
 
-    5. repo data leakage
+5. repo data leakage
 
-        - attacker modifies existing webhook to point to a controlled server
+    - attacker modifies existing webhook to point to a controlled server
 
-        - sensitive repo data sent to attacker whenever webhook triggers
+    - sensitive repo data sent to attacker whenever webhook triggers
 
-    6.  webhook spamming
+6.  webhook spamming
 
-        - attacker creates webhooks that trigger on common repo events
+    - attacker creates webhooks that trigger on common repo events
 
-        - results similar to DDoS
+    - results similar to DDoS
 
-    mitigations:
+mitigations:
 
-        1. control + monitor who has the ability to create/modify webhooks in repos
+    1. control + monitor who has the ability to create/modify webhooks in repos
 
-        2. use HTTPS endpoints for webhooks to encrypted transmitted data
+    2. use HTTPS endpoints for webhooks to encrypted transmitted data
 
-        3. implement signature verification on receiving end of webhook to validate payloads
+    3. implement signature verification on receiving end of webhook to validate payloads
 
-        4. review + audit webhooks configured in repos
+    4. review + audit webhooks configured in repos
 
-        5. least privilege principle to account/service that handles webhook actions
+    5. least privilege principle to account/service that handles webhook actions
 
-        6. ensure scripts/process triggered by webhooks do not expose vulns
+    6. ensure scripts/process triggered by webhooks do not expose vulns
 
 
 **Slack? [Referring to Slack security]**
 
-    1. phishing
+1. phishing
 
-        - attackers impersonate legit users/orgs within slack
+    - attackers impersonate legit users/orgs within slack
 
-        - send messages containing malicious links/requests for information
+    - send messages containing malicious links/requests for information
 
-    2. malware
+2. malware
 
-        - can be distributed via files/links shared in channels or DMs
+    - can be distributed via files/links shared in channels or DMs
 
-        - users can infect their systems unintentionally, and further spread the malware
+    - users can infect their systems unintentionally, and further spread the malware
 
-    3. data leakage
+3. data leakage
 
-        - compromised accounts can intentionally or accidentally leak data
+    - compromised accounts can intentionally or accidentally leak data
 
-        - info can be used for espionage, blackmail, public exposure
+    - info can be used for espionage, blackmail, public exposure
 
-    4. integration exploits
+4. integration exploits
 
-        - integration with other services/tools can be exploited
+    - integration with other services/tools can be exploited
 
-        - poorly secured integrations used to gain access to external systems/data
+    - poorly secured integrations used to gain access to external systems/data
 
-    5. credential theft
+5. credential theft
 
-        - through social engineering/phishing
+    - through social engineering/phishing
 
-    6. MITM
+6. MITM
 
-        - if slack is intercepted over unsecured WiFi, it could be vulnerable to eavesdropping
+    - if slack is intercepted over unsecured WiFi, it could be vulnerable to eavesdropping
 
-        - attackers can potentially intercept/read messages
+    - attackers can potentially intercept/read messages
 
-    7. ransomware/extortion
+7. ransomware/extortion
 
-    8. bot-based attacks
+8. bot-based attacks
 
-    mitigations:
+mitigations:
 
-        1. user awareness/education
+    1. user awareness/education
 
-        2. secure integrations
+    2. secure integrations
 
-        3. channel monitoring
+    3. channel monitoring
 
-        4. strong authentication
+    4. strong authentication
 
-        5. use slack over secure, encrypted networks
+    5. use slack over secure, encrypted networks
 
-        6. regular audits
+    6. regular audits
 
-        7. control file sharing
+    7. control file sharing
 
 
-7. Compliance
-Can you explain SOC 2? What are the five trust criteria?
-What is the difference between Governance, Risk, and Compliance?
+## 7. Compliance
+
+**Can you explain SOC 2 (Service Organization Control 2)? What are the five trust criteria?**
+
+- specifically intended for service providers storing customer data in the cloud
+
+- ensures information security measures are in line with today's cloud env requirements
+
+- developed by AICPA (American Institute of CPAs)
+
+- SOC 2 reports based on AICPA's Trust Services Criteria
+
+    - Type I: evaluates suitability of design of controls at specific moment in time
+
+    - Type II: examines operational effectiveness of these controls over a period (typically 6 months)
+
+- trust criteria:
+
+    1. security
+
+        - protection of system resources against unauthorized access
+
+        - security controls prevent potential system abuse, theft, unauthorized removal of data, misuse of software, improper alteration, disclosure of information
+
+    2. availability
+
+        - accessibility of system, products, services as stipulated by contract or SLA (Service Level Agreement)
+
+        - does not focus on functionality/usability but addresses availability of system
+
+    3. processing integrity
+
+        - whether system achieves its purpose (i.e. delivers the right data at the right price at the right time)
+
+        - focuses on completeness, validity, accuracy, timeliness, authorization of system processing
+
+    4. confidentiality
+
+        - data designated as confidential and how it's protected
+
+        - applies to data intended to be restricted to a certain group of individuals/orgs (business plans, intellectual property, internal price lists, sensitive financial information)
+
+    5. privacy
+
+        - collection, use, retention, disclosure, disposal of personal information in conformity with an org's privacy notice and principles consistent with AICPA's GAPP (Generally Accepted Privacy Principles)
+
+        - system's collection of personal information, how it's used, who it's shared with, how it's disposed of/anonymized
+
+- customizable to business needs
+
+**What is the difference between Governance, Risk, and Compliance?**
+
+- **governance**
+
+    - set of processes, policies, laws, and institutions that define the structure by which companies are directed + managed
+
+    - balancing interests of a company's stakeholders
+
+    - elements:
+
+        - corporate strategy
+
+        - leadership + organization
+
+        - corporate policies + standards
+
+    - ensures org activities are aligned with business goals, conducted transparently + ethically, adhere to the law
+
+- **risk**
+
+    - identifying, assessing, controlling threats to an org's capital/earnings
+
+    - risks can stem from a variety of sources (financial uncertainties, legal liabilities, strategic management errors, accidents, natural disasters)
+
+    - elements:
+
+        - risk assessment
+
+        - risk mitigation
+
+    - ensures org understands/mitigates risks associated with its activities
+
+- **compliance**
+
+    - conforming to stated requirements
+
+    - adhering to laws, policies, regulations, contractual obligations
+
+    - elements:
+
+        - regulatory compliance
+
+        - policy compliance
+
+    - org operates in legal/ethical manner + meets its external statutory/regulatory requirements
 
 # Intermediate Level
 
@@ -721,234 +897,302 @@ These questions require a deeper understanding and some practical experience:
 
 ## 1. Encryption and Authentication
 
-What is a three-way handshake?
-
 **Explain how OAuth (used for token-based auth) works.**
 
-    - roles:
+- roles:
 
-        - resource owner: owns data/resources
+    - resource owner: owns data/resources
 
-        - resource server: server hosting user's data
+    - resource server: server hosting user's data
 
-        - client: app requesting access to user's data on resource server
+    - client: app requesting access to user's data on resource server
 
-        - authorization server: server that authenticates resource owner + issues access tokens to client
+    - authorization server: server that authenticates resource owner + issues access tokens to client
 
-    - tokens:
+- tokens:
 
-        - access token: used by client to access user's data on resource server
+    - access token: used by client to access user's data on resource server
 
-        - refresh token (optional): used to obtain new access token when current access token expires
+    - refresh token (optional): used to obtain new access token when current access token expires
 
-    - flow (OAuth2.0):
+- flow (OAuth2.0):
 
-        1. authorization request
+    1. authorization request
 
-            - client requests authorization from resource owner to access resources
+        - client requests authorization from resource owner to access resources
 
-            - request happens via browser redirect (user asked to authorize client at authorization server)
+        - request happens via browser redirect (user asked to authorize client at authorization server)
 
-        2. user authorization
+    2. user authorization
 
-            - resource owner grants client permission at authorization server
+        - resource owner grants client permission at authorization server
 
-            - involves user logging in and consenting to grant access to data
+        - involves user logging in and consenting to grant access to data
 
-        3. authorization grant
+    3. authorization grant
 
-            - authorization server provides authorization grant to client
+        - authorization server provides authorization grant to client
 
-            - grant can be authorization code, implicit grant, resource owner creds, client creds
+        - grant can be authorization code, implicit grant, resource owner creds, client creds
 
-        4. access token request
+    4. access token request
 
-            - client requests access token from authorization server by presenting authorization grant + credentials
+        - client requests access token from authorization server by presenting authorization grant + credentials
 
-            - happens behind the scenes, without user interaction
+        - happens behind the scenes, without user interaction
 
-        5. issuing access token
+    5. issuing access token
 
-            - authorization server authenticates client, validates authorization grant
+        - authorization server authenticates client, validates authorization grant
 
-            - issues access token (plus optional refresh token) to client
+        - issues access token (plus optional refresh token) to client
 
-        6. accessing resources
+    6. accessing resources
 
-            - client uses access token to request resources from resource server
+        - client uses access token to request resources from resource server
 
-            - resource server validates access token + serves client's request
+        - resource server validates access token + serves client's request
 
-    - grant types:
+- grant types:
 
-        - authorization code: for apps running on web server; involves redirection to authorization server for user auth
+    - authorization code: for apps running on web server; involves redirection to authorization server for user auth
 
-        - implicit: simplified flow used by mobile/web apps where access token is returned immediately without an extra authorization code exchange step
+    - implicit: simplified flow used by mobile/web apps where access token is returned immediately without an extra authorization code exchange step
 
-        - resource owner password creds: used by trusted clients, resource owner provides username and password directly to client
+    - resource owner password creds: used by trusted clients, resource owner provides username and password directly to client
 
-        - client creds: used for server-server communication, client acts on own behalf (not for user)
+    - client creds: used for server-server communication, client acts on own behalf (not for user)
 
-    - security:
+- security:
 
-        - redirect URIs: must be pre-registered + validated to prevent reflection attacks
+    - redirect URIs: must be pre-registered + validated to prevent reflection attacks
 
-        - access token security: transmit securely and stored safely to prevent authorized access
+    - access token security: transmit securely and stored safely to prevent authorized access
 
-        - consent + transparency: understand what perms are being granted
+    - consent + transparency: understand what perms are being granted
 
-        - token scope + lifetime: limit access tokens to minimal scopes/durations necessary for task
+    - token scope + lifetime: limit access tokens to minimal scopes/durations necessary for task
 
 
 **Describe the difference between synchronous and asynchronous encryption.**
 
-    - **synchronous (symmetric)**
+- **synchronous (symmetric)**
 
-        - uses same key for encryption + decryption (symmetric key)
+    - uses same key for encryption + decryption (symmetric key)
 
-        - sender + receiver possess the same key and must keep it secret
+    - sender + receiver possess the same key and must keep it secret
 
-        - sender uses symmetric key to encrypt plaintext into ciphertext
+    - sender uses symmetric key to encrypt plaintext into ciphertext
 
-        - receiver uses same key to decrypt ciphertext into plaintext
+    - receiver uses same key to decrypt ciphertext into plaintext
 
-        - common algos include AES, DES, 3DES
+    - common algos include AES, DES, 3DES
 
-        - faster + less resource-intensive than asynchronous
+    - faster + less resource-intensive than asynchronous
 
-        - suitable for encrypting large amounts of data
+    - suitable for encrypting large amounts of data
 
-        - key distribution problem (how to distribute key to recipient securely)
+    - key distribution problem (how to distribute key to recipient securely)
 
-        - used for encrypting data at rest (disk files) and data in transit (secure VPNs)
+    - used for encrypting data at rest (disk files) and data in transit (secure VPNs)
 
-    - **asynchronous (asymmetric)**
+- **asynchronous (asymmetric)**
 
-        - public + private key
+    - public + private key
 
-        - public key openly shared, private key secret
+    - public key openly shared, private key secret
 
-        - message encrypted with public key can only be decrypted with private key (and vice versa)
+    - message encrypted with public key can only be decrypted with private key (and vice versa)
 
-        - secure communication even if public key is known
+    - secure communication even if public key is known
 
-        - common algos include RSA, ECC (elliptic curve crypto), EIGamal
+    - common algos include RSA, ECC (elliptic curve crypto), EIGamal
 
-        - slower + more computationally intensive
+    - slower + more computationally intensive
 
-        - not used for encrypting large volumes of data
+    - not used for encrypting large volumes of data
 
-        - no key distribution problem
+    - no key distribution problem
 
-        - can be used for digital signatures to ensure authenticity and non-repudiation
+    - can be used for digital signatures to ensure authenticity and non-repudiation
 
-        - used for secure key exchange, digital signatures, encrypting small amounts of data (keys, passwords, messages, etc)
+    - used for secure key exchange, digital signatures, encrypting small amounts of data (keys, passwords, messages, etc)
 
-    - **differences**
+- **differences**
 
-        - key management
+    - key management
 
-        - speed/efficiency
+    - speed/efficiency
 
-        - common applications
+    - common applications
 
 
-Describe SSL handshake.
+**Describe SSL (Secure Sockets Layer) handshake.**
+
+- protocol used to establish secure comm channel between 2 parties (web server + client)
+
+- part of the TLS (Transport Layer Security) protocol (succeeded SSL)
+
+1. `ClientHello`
+
+    - client sends `ClientHello` message to server
+
+    - message includes client's SSL/TLS version, list of supported cipher suites (algos for encryption, key exchange, authentication), random byte string used in subsequent cryptographic computations
+
+2. `ServerHello`
+
+    - server responds with `ServerHello` message
+
+    - selects SSL/TLS version and cipher suite from options provided by client
+
+    - also sends its own random byte string
+
+3. Server Certificate
+
+    - server presents its SSL cert to client
+
+    - cert contains server's public key and is used to auth server to client
+
+4. Server Key Exchange (if required)
+
+    - if chosen cipher suite requires additional key exchange info, server provides necessary key exchange params
+
+5. `ServerHelloDone`
+
+    - server sends `ServerHelloDone` message, indicating it has finished its part of the handshake
+
+6. Client Key Exchange
+
+    - client (after validating server cert and key exchange params) generated pre-master secret, encrypts it with server's public key, and sends it to server
+
+7. `Change Cipher Spec` + `Finished` Message (client + server)
+
+    - client sends `Change Cipher Spec` signaling it will start using the new keys + algos for securing comm
+
+    - client then sends `Finished` message, confirming
+
+    - server also sends `Change Cipher Spec` followed by `Finished`
+
+8. Secure Symmetric Encryption Established
+
+    - both parties compute session key from pre-master secret
+
+    - secure encrypted connection is established using symmetric encryption
+
+- authentication: server is auth'd to client using SSL cert (client auth is optional)
+
+- confidentiality + integrity: session keys used for encryption ensure confidentiality + integrity
+
+- key exchange
+
+- negotiation
 
 **Should you encrypt all data at rest?**
 
-    - refers to data stored on physical medium (hard drive, SSD, USB, cloud, i.e. not being transferred/processed)
+- refers to data stored on physical medium (hard drive, SSD, USB, cloud, i.e. not being transferred/processed)
 
-    - encryption: transform into unreadable format using crypto algos
+- encryption: transform into unreadable format using crypto algos
 
-    - **yes**
+- **yes**
 
-        - encryption is vital for protecting sensitive data from unauthorized access
+    - encryption is vital for protecting sensitive data from unauthorized access
 
-        - regulations (like GDPR, HIPAA, PCI-DSS) mandate or strongly recommend encryption
+    - regulations (like GDPR, HIPAA, PCI-DSS) mandate or strongly recommend encryption
 
-        - adds an additional layer of security
+    - adds an additional layer of security
 
-    - **no**
+- **no**
 
-        - can introduce latency + reduced performance
+    - can introduce latency + reduced performance
 
-        - managing keys and maintaining encryption protocols can add complexity to operations
+    - managing keys and maintaining encryption protocols can add complexity to operations
 
-        - additional costs
+    - additional costs
 
-        - not all data is equally sensitive
+    - not all data is equally sensitive
 
-    - **balanced**
+- **balanced**
 
-        - classify data based on sensitivity
+    - classify data based on sensitivity
 
-        - robust key management practices
+    - robust key management practices
 
-        - regular audits
+    - regular audits
 
-        - built-in encryption options in dbs, file systems, cloud services
+    - built-in encryption options in dbs, file systems, cloud services
 
-        - use as part of a broader security strategy (access controls, network security, security training)
+    - use as part of a broader security strategy (access controls, network security, security training)
 
 
 ## 2. Network Level and Logging
 
-Explain TCP/IP concepts.
+**How does a router differ from a switch?**
 
-How does a router differ from a switch?
+- routers (using NAT, DHCP) operate at Network Layer (Layer 3) using IP, switches (LAN) operate at Data Link Layer (Layer 2) using MAC
 
-What is the difference between HTTPS and SSL?
+- routers used to connect different networks + direct data between them, switches used to connect devices within same network + manage internal data traffic
+
+- routers handle internal + external traffic (network-wide traffic management), switches primarily handle local traffic (forward data within internal network)
+
+**What is the difference between HTTPS and SSL?**
+
+- SSL/TLS is a protocol for encryption, HTTPS is an implementation of SSL/TLS applied to HTTP
+
+- SSL/TLS can be used beyond just securing HTTP (can secure FTP, SMTP), HTTPS is tied to HTTP
+
+- SSL evolved into TLS
 
 
 **How does threat modeling work?**
 
-    - identify, prioritize, address potential security threats
+- identify, prioritize, address potential security threats
 
-    - simulate attack scenarios, assess vulns in connected systems/apps
+- simulate attack scenarios, assess vulns in connected systems/apps
 
-    - reduce org's risk exposure by identifying vulns and potential attack vectors
+- reduce org's risk exposure by identifying vulns and potential attack vectors
 
-    - threat, vuln, risk
+- threat, vuln, risk
 
-    - process:
+- process:
 
-        1. define scope
+    1. define scope
 
-        2. asset identification
+    2. asset identification
 
-        3. identify threats
+    3. identify threats
 
-        4. analyze vulns + prioritize risks
+    4. analyze vulns + prioritize risks
 
-        5. develop + implement countermeasures
+    5. develop + implement countermeasures
 
-        6. monitor + evaluate
+    6. monitor + evaluate
 
-    - collab (security, engineering, IT, governance, business, end users)
+- collab (security, engineering, IT, governance, business, end users)
 
-    - frameworks
+- frameworks
 
-        - MITRE ATT&CK (map identified threats to known adversary methods): knowledge base of TTPs
+    - MITRE ATT&CK (map identified threats to known adversary methods): knowledge base of TTPs
 
-        - DREAD (Damage, Reproducability, Exploitability, Affected Users, Discoverability): risk assessment model, quantitative approach to prioritizing threats
+    - DREAD (Damage, Reproducability, Exploitability, Affected Users, Discoverability): risk assessment model, quantitative approach to prioritizing threats
 
-        - STRIDE (Spoofing, Tampering, Repudiation, Information Disclosure, Denial of Service, Elevation of Privilege): categorizing threats in software systems
+    - STRIDE (Spoofing, Tampering, Repudiation, Information Disclosure, Denial of Service, Elevation of Privilege): categorizing threats in software systems
 
-        - PASTA: aligns threat modeling with business objectives, across various org contexts
+    - PASTA: aligns threat modeling with business objectives, across various org contexts
 
-    - benefits
+- benefits
 
-        - enhances awareness, identifies vulns
+    - enhances awareness, identifies vulns
 
-        - prioritizes risk mitigation, optimizes security controls
+    - prioritizes risk mitigation, optimizes security controls
 
-        - adapts to evolving threats, improves org resilience
+    - adapts to evolving threats, improves org resilience
 
 
 Explain the difference between IPSEC Phase 1 and Phase 2?
 
-How does HTTPS work?
+**How does HTTPS work?**
+
+- client requests secure connection -> SSL/TLS handshake -> server auth -> key exchange -> secure symmetric connection established -> encrypted data transfer -> session closure
 
 ## 3. OWASP Top 10, Pentesting, and/or Web Applications
 
@@ -956,51 +1200,53 @@ Explain man-in-the-middle attacks.
 
 Describe what are egghunters and their use in exploit development.
 
-How is padlock icon in browser generated?
+**How is padlock icon in browser generated?**
+
+- if a server's SSL cert is validated (valid, not expired, issued by trusted CA, matches website's domain)
 
 ## 4. Databases
 
 **How would you secure a Mongo database? Postgres?**
 
-    - **mongoDB**:
+- **mongoDB**:
 
-        1. enable authentication
+    1. enable authentication
 
-            - turn on mongo built-in authentication, use SCRAM-SHA-256 for strong password auth
+        - turn on mongo built-in authentication, use SCRAM-SHA-256 for strong password auth
 
-            - create specific user accounts with least privs necessary for role
+        - create specific user accounts with least privs necessary for role
 
-        2. configure RBAC
+    2. configure RBAC
 
-            - define roles, assign them only necessary privs for accessing/modifying data
+        - define roles, assign them only necessary privs for accessing/modifying data
 
-        3. encrypt data
+    3. encrypt data
 
-            - encryption at rest to protect stored data using mongo's native encryption features
+        - encryption at rest to protect stored data using mongo's native encryption features
 
-            - use TLS/SSL for data in transit to secure client-server comms
+        - use TLS/SSL for data in transit to secure client-server comms
 
-        4. network security
+    4. network security
 
-            - bind mongoDB to local interface or use firewalls to restrict which clients can connect to db server
+        - bind mongoDB to local interface or use firewalls to restrict which clients can connect to db server
 
-            - use VPN/private network for added security
+        - use VPN/private network for added security
 
-        5. audit/monitor db activity
+    5. audit/monitor db activity
 
-            - enable mongo's auditing features to track/log access and changes to db
+        - enable mongo's auditing features to track/log access and changes to db
 
-            - regularly monitor logs for unusual/unauth'd activities
+        - regularly monitor logs for unusual/unauth'd activities
 
-        6. regular updates + patches
+    6. regular updates + patches
 
-        7. backup + disaster recovery
+    7. backup + disaster recovery
 
-        8. avoid exposing mongoDB to internet: always use app-level access or secure APIs
+    8. avoid exposing mongoDB to internet: always use app-level access or secure APIs
 
-    - **postgresql**:
+- **postgresql**:
 
-        - pretty much the same as mongo except `pg_hba.conf` can be configured to control which hosts can connect and how, and parametrized queries should be used to prevent SQLi attacks
+    - pretty much the same as mongo except `pg_hba.conf` can be configured to control which hosts can connect and how, and parametrized queries should be used to prevent SQLi attacks
 
     - keep dev, test, prod envs separate
 
@@ -1011,65 +1257,65 @@ Given a sample packet capture - Identify the protocol, the traffic, and the like
 
 **How would you use CI/CD to improve security?**
 
-    - integrating security
+- integrating security
 
-        1. automated security scanning
+    1. automated security scanning
 
-            - tools like SAST/DAST can identify vulns early in dev process
+        - tools like SAST/DAST can identify vulns early in dev process
 
-            - use software composition analysis tools to check for vulns in 3rd party libraries or dependencies
+        - use software composition analysis tools to check for vulns in 3rd party libraries or dependencies
 
-        2. code quality checks
+    2. code quality checks
 
-            - implement code quality gates that prevent merging code changes that do not meet predefined security standards
+        - implement code quality gates that prevent merging code changes that do not meet predefined security standards
 
-            - use linters/code analyzers to enforce best practices + detect security anti-patterns
+        - use linters/code analyzers to enforce best practices + detect security anti-patterns
 
-        3. secrets management
+    3. secrets management
 
-            - automate process of securing/managing secrets (API keys, passwords, certs)
+        - automate process of securing/managing secrets (API keys, passwords, certs)
 
-            - tools like HashiCorp Vault, AWS Secrets Manager, etc can be integrated into CI/CD pipeline
+        - tools like HashiCorp Vault, AWS Secrets Manager, etc can be integrated into CI/CD pipeline
 
-        4. automated compliance checks
+    4. automated compliance checks
 
-            - incorporate tools to check for compliance with standards/regulations
+        - incorporate tools to check for compliance with standards/regulations
 
-            - use IaC (infra as code) scanning tools to ensure that infrastructure deployments adhere to best practices
+        - use IaC (infra as code) scanning tools to ensure that infrastructure deployments adhere to best practices
 
-        5. container scanning
+    5. container scanning
 
-            - intergrate container scanning tools into CI pipeline to identify vulns within container images
+        - intergrate container scanning tools into CI pipeline to identify vulns within container images
 
-        6. dynamic env testing
+    6. dynamic env testing
 
-            - automatically deploy changes to dynamic testing env where additional security tests can be conducted, included pentesting + runtime analysis
+        - automatically deploy changes to dynamic testing env where additional security tests can be conducted, included pentesting + runtime analysis
 
-    - continuous delivery/deployment
+- continuous delivery/deployment
 
-        1. automated deployment
+    1. automated deployment
 
-            - reduce human errors
+        - reduce human errors
 
-            - use tools like jenkins, gitlab, github actions
+        - use tools like jenkins, gitlab, github actions
 
-            - ensure deployment process includes steps to verify security of deployment (check for proper configs + runtime env security)
+        - ensure deployment process includes steps to verify security of deployment (check for proper configs + runtime env security)
 
-        2. post-deployment monitoring
+    2. post-deployment monitoring
 
-            - integrate security monitoring tools into prod env to continuously monitor for suspicious activities or vulns
+        - integrate security monitoring tools into prod env to continuously monitor for suspicious activities or vulns
 
-            - implement logging/alerting mechanisms to detect + respond to incidents in real-time
+        - implement logging/alerting mechanisms to detect + respond to incidents in real-time
 
-    - security in infra management
+- security in infra management
 
-        1. IaC
+    1. IaC
 
-            - merge infra thru code to ensure consistent and repeatable setups
+        - merge infra thru code to ensure consistent and repeatable setups
 
-            - perform regular audits on IaC to detect misconfigs
+        - perform regular audits on IaC to detect misconfigs
 
-        2. regular updates + patches
+    2. regular updates + patches
 
 
 ## 6. Programming and Code
@@ -1098,638 +1344,720 @@ These questions are highly technical and require extensive knowledge and experie
 
 **cookies**:
 
-        - small pieces of data stored on client's browser
+- small pieces of data stored on client's browser
 
-        - sent to/from server with each web request, allowing server to maintain state or remember info about user
+- sent to/from server with each web request, allowing server to maintain state or remember info about user
 
-        - key-value pairs that server instructs client's browser to store
+- key-value pairs that server instructs client's browser to store
 
-        - when a user visits website, server sends `Set-Cookie` header with response
+- when a user visits website, server sends `Set-Cookie` header with response
 
-        - browser automatically attaches these cookies to every subsequent request to the same domain using `Cookie` HTTP header
+- browser automatically attaches these cookies to every subsequent request to the same domain using `Cookie` HTTP header
 
-        - attributes:
+- attributes:
 
-            - `Expires/Max-Age`: how long cookie should be stored
+    - `Expires/Max-Age`: how long cookie should be stored
 
-            - `Domain`: which domain cookie belongs to
+    - `Domain`: which domain cookie belongs to
 
-            - `Path`: limits cookie to specific path within domain
+    - `Path`: limits cookie to specific path within domain
 
-            - `Secure`: cookie should only be sent over HTTPS connections
+    - `Secure`: cookie should only be sent over HTTPS connections
 
-            - `HttpOnly`: prevents javascript access to cookie (mitigates XSS)
+    - `HttpOnly`: prevents javascript access to cookie (mitigates XSS)
 
-            - `SameSite`: controls when cookies are sent with cross-site requests
+    - `SameSite`: controls when cookies are sent with cross-site requests
 
-        - session cookies are temporary + deleted when browser is closed (no expiration time set)
+    - session cookies are temporary + deleted when browser is closed (no expiration time set)
 
-        - persistent cookies remain on device until expiry or deletion
+    - persistent cookies remain on device until expiry or deletion
 
-        - vulnerable to theft (via XSS) or interception
+    - vulnerable to theft (via XSS) or interception
 
-        - mitigation through setting `HttpOnly`, `Secure`, `SameSite`
+    - mitigation through setting `HttpOnly`, `Secure`, `SameSite`
 
 **sessions**:
 
-        - store data on server-side, linked to unique session ID
+- store data on server-side, linked to unique session ID
 
-        - session ID usually sent to browser as session cookie
+- session ID usually sent to browser as session cookie
 
-        - created upon user login or when user starts interacting with an app that requires state mgmt
+- created upon user login or when user starts interacting with an app that requires state mgmt
 
-        - persists across multiple HTTP requests, ends with user logout or inactivity
+- persists across multiple HTTP requests, ends with user logout or inactivity
 
-        - can include sensitive info like user ID, auth tokens, user prefs
+- can include sensitive info like user ID, auth tokens, user prefs
 
-        - data accessible server-side by referencing session ID received from client's cookie
+- data accessible server-side by referencing session ID received from client's cookie
 
-        - security:
+- security:
 
-            - regenerate session IDs post-auth to prevent session fixation attacks
+    - regenerate session IDs post-auth to prevent session fixation attacks
 
-            - implement session timeouts 
+    - implement session timeouts 
 
-            - store minimal sensitive data
+    - store minimal sensitive data
 
-            - secure session data storage + retrieval
+    - secure session data storage + retrieval
 
 **cookies + sessions**:
 
-        - cookies (with session IDs) and sessions work together to maintain state/user data
+- cookies (with session IDs) and sessions work together to maintain state/user data
 
-        - cookies identify session, sessions store data server-side
+- cookies identify session, sessions store data server-side
 
-        - use HTTPS to secure cookie transmission
+- use HTTPS to secure cookie transmission
 
-        - implement CSRF tokens in conjunction with sessions to prevent CSRF attacks
+- implement CSRF tokens in conjunction with sessions to prevent CSRF attacks
 
-        - regular audit + validation
+- regular audit + validation
 
 
 **What is a public key infrastructure (PKI) flow and how would I diagram it?**
 
-    - components:
+- components:
 
-        1. CA (cert authority): issues digital certs, validates requests for digital certs and issues to verified entities
+1. CA (cert authority): issues digital certs, validates requests for digital certs and issues to verified entities
 
-        2. RA (registration authority): verifier for CA, performs prelim verification before CA issues certs
+2. RA (registration authority): verifier for CA, performs prelim verification before CA issues certs
 
-        3. certificate db: stores issued certs and their status (valid, expired, revoked), repo for cert management
+3. certificate db: stores issued certs and their status (valid, expired, revoked), repo for cert management
 
-        4. certificate store: resides on client and stores trusted CA certs, helps client verify authenticity of received certs
+4. certificate store: resides on client and stores trusted CA certs, helps client verify authenticity of received certs
 
-        5. end users: individuals or systems that use/rely on digital certs or secure communication
-
-    - 
+5. end users: individuals or systems that use/rely on digital certs or secure communication
+ 
 **How does HMAC (Hash-based Message Authentication Code) work? Why is HMAC designed in that way?**
 
-    - components
+- components
 
-        - involves crypto hash function (like SHA-256) + secret key
+    - involves crypto hash function (like SHA-256) + secret key
 
-        - process combines message with key to produce a unique hash
+    - process combines message with key to produce a unique hash
 
-    - process
+- process
 
-        - key + message: key is combined with message; if key is shorter than block size of hash func, it's padded; if key is longer, it's hashed to fit
+    - key + message: key is combined with message; if key is shorter than block size of hash func, it's padded; if key is longer, it's hashed to fit
 
-        - inner + outer hash: combined message + key are first hashed (inner), result is then combined with key again and hashed again (outer)
+    - inner + outer hash: combined message + key are first hashed (inner), result is then combined with key again and hashed again (outer)
 
-        - formula: `HMAC(K, m) = H((K' ⊕ opad) || H((K' ⊕ ipad) || m))`
+    - formula: `HMAC(K, m) = H((K' ⊕ opad) || H((K' ⊕ ipad) || m))`
 
-            - `H` is hash function
+        - `H` is hash function
 
-            - `K'` is modified key
+        - `K'` is modified key
 
-            - `m` is message
+        - `m` is message
 
-            - `opad`, `ipad` are specific padding constants
+        - `opad`, `ipad` are specific padding constants
 
-            - `||` is concatenation
+        - `||` is concatenation
 
-        - result: output is an HMAC value unique to message + key combo; this value is sent along with message
+    - result: output is an HMAC value unique to message + key combo; this value is sent along with message
 
-    - HMAC provides authentication (source verification) and integrity (ensuring message wasn't altered)
+- HMAC provides authentication (source verification) and integrity (ensuring message wasn't altered)
 
-    - secret key ensures only those with the key can generate/verify an HMAC
+- secret key ensures only those with the key can generate/verify an HMAC
 
-    - double hashing protects against length-extension attacks (common in some hash funcs)
+- double hashing protects against length-extension attacks (common in some hash funcs)
 
-    - design makes it computationally infeasible to retrieve original key/message
+- design makes it computationally infeasible to retrieve original key/message
 
-    - HMAC can be used with any iterative crypto hash func (MD5, SHA-1, SHA-256); allows it to adapt as hash funcs evolve
+- HMAC can be used with any iterative crypto hash func (MD5, SHA-1, SHA-256); allows it to adapt as hash funcs evolve
 
-    - HMAC process is relatively simple -> efficient to compute
+- HMAC process is relatively simple -> efficient to compute
 
-    - easy to implement in various envs and programming langs
+- easy to implement in various envs and programming langs
 
-    - commonly used in API authentication (API requests)
+- commonly used in API authentication (API requests)
 
-    - data integrity
+- data integrity
 
-    - digital signatures 
+- digital signatures 
 
 
 **How does Kerberos work?**
 
-    - components:
+- components:
 
-        - client
+    - client
 
-        - server
+    - server
 
-        - KDC (key distribution center):
+    - KDC (key distribution center):
 
-            1. AS (authentication server) - authenticates clients and issues TGTs (tickets granting tickets)
+        1. AS (authentication server) - authenticates clients and issues TGTs (tickets granting tickets)
 
-            2. TGS (ticket granting server) - issues service tickets based on TGTs
+        2. TGS (ticket granting server) - issues service tickets based on TGTs
 
-    - authentication process
+- authentication process
 
-        1. initial authentication:
+    1. initial authentication:
 
-            - client requests access
+        - client requests access
 
-            - client sends pre-auth request to AS in KDC, including client ID and ID of desired service
+        - client sends pre-auth request to AS in KDC, including client ID and ID of desired service
 
-        2. TGT issuance
+    2. TGT issuance
 
-            - AS validates client using information in the db (password)
+        - AS validates client using information in the db (password)
 
-            - AS issues TGT encrypted with secret key derived from client's password
+        - AS issues TGT encrypted with secret key derived from client's password
 
-        3. TGT retrieval by client
+    3. TGT retrieval by client
 
-            - client receives + decrypts TGT using the password
+        - client receives + decrypts TGT using the password
 
-            - TGT contains session key for further comms + timestamp
+        - TGT contains session key for further comms + timestamp
 
-        4. request service ticket
+    4. request service ticket
 
-            - client sends TGT to TGS with request for specific service
+        - client sends TGT to TGS with request for specific service
 
-            - client also sends service request including TGT + authenticator, encrypted with session key
+        - client also sends service request including TGT + authenticator, encrypted with session key
 
-        5. service ticket issuance
+    5. service ticket issuance
 
-            - TGS decrypts TGT, retrieves session key, decrypts authenticator
+        - TGS decrypts TGT, retrieves session key, decrypts authenticator
 
-            - TGS issues service ticket, encrypted with service's secret key
+        - TGS issues service ticket, encrypted with service's secret key
 
-        6. access
+    6. access
 
-            - client sends service ticket to server
+        - client sends service ticket to server
 
-            - server decrypts ticket with secret key, verifies client's credentials, grants access
+        - server decrypts ticket with secret key, verifies client's credentials, grants access
 
-        7. session
+    7. session
 
-            - client + server use session key (incl in service ticket) to communicate securely
+        - client + server use session key (incl in service ticket) to communicate securely
 
-    - features
+- features
 
-        - encrypted tickets
+    - encrypted tickets
 
-        - limited lifespan of tickets
+    - limited lifespan of tickets
 
-        - mutual authentication
+    - mutual authentication
 
-        - session keys (temporary)
+    - session keys (temporary)
 
-        - time-sensitive
+    - time-sensitive
 
-        - single point of failure (KDC)
+    - single point of failure (KDC)
 
-        - password vulnerabilities
+    - password vulnerabilities
 
 
 **If you're going to compress and encrypt a file, which do you do first and why?**
 
-    - compress then encrypt
+- compress then encrypt
 
-    - efficiency: 
+- efficiency: 
 
-        - compression eliminates redundancy (predictable patterns or repeated content)
+    - compression eliminates redundancy (predictable patterns or repeated content)
 
-        - pre-encryption state means the data maintains its inherent patterns + redundancy
+    - pre-encryption state means the data maintains its inherent patterns + redundancy
 
-    - impact of encryption:
+- impact of encryption:
 
-        - encryption algos transform data into ciphertext, this randomness eliminates redundancy and patterns
+    - encryption algos transform data into ciphertext, this randomness eliminates redundancy and patterns
 
-        - post-encryption state: data lacks the structure that compression leverages, meaning compressing an encrypted file doesn't reduce its size and may even increase it
+    - post-encryption state: data lacks the structure that compression leverages, meaning compressing an encrypted file doesn't reduce its size and may even increase it
 
-    - security: 
+- security: 
 
-        - leakage: compression after encryption can potentially leak information about encrypted data, patterns in compression results can be exploited to glean information about underlying encrypted data
+    - leakage: compression after encryption can potentially leak information about encrypted data, patterns in compression results can be exploited to glean information about underlying encrypted data
 
-        - uniformity: encryption produces output that is indistinguishable from random data (crucial for security)
+    - uniformity: encryption produces output that is indistinguishable from random data (crucial for security)
 
-    - performance:
+- performance:
 
-        - compressing first is more computationally efficient (compression requires less power compared to encryption)
+    - compressing first is more computationally efficient (compression requires less power compared to encryption)
 
-    - modern formats combine compression and encryption into a single step
+- modern formats combine compression and encryption into a single step
 
 
 **How do I authenticate you and know you sent the message?**
 
-    - mechanisms:
+- mechanisms:
 
-        1. digital signatures
+    1. digital signatures
 
-            - asymmetric cryptography
+        - asymmetric cryptography
 
-            - sender signs message with private key, receiver uses sender's public key to verify signature
+        - sender signs message with private key, receiver uses sender's public key to verify signature
 
-            - if signature is valid, it confirms message was sent by holder of corresponding private key
+        - if signature is valid, it confirms message was sent by holder of corresponding private key
 
-        2. PKI
+    2. PKI
 
-            - involves digital certs issued by CAs
+        - involves digital certs issued by CAs
 
-            - certs bing public key to entity (individual or org)
+        - certs bing public key to entity (individual or org)
 
-            - verification of digital signature with cert confirms sender's identity
+        - verification of digital signature with cert confirms sender's identity
 
-        3. hash funcs + HMAC
+    3. hash funcs + HMAC
 
-            - hash func generates fixed-size hash value from message
+        - hash func generates fixed-size hash value from message
 
-            - any change in message results in different hash, ensuring integrity
+        - any change in message results in different hash, ensuring integrity
 
-            - HMAC involves secret key + message hash, providing integrity/authentication
+        - HMAC involves secret key + message hash, providing integrity/authentication
 
-        4. TLS/SSL
+    4. TLS/SSL
 
-            - secure internet comms
+        - secure internet comms
 
-            - provides auth thru digital certs and encrypts data
+        - provides auth thru digital certs and encrypts data
 
-    - process
+- process
 
-        1. sender encrypts/signs message using private key or shared secret key
+    1. sender encrypts/signs message using private key or shared secret key
 
-        2. message transmitted over network (TLS used to protect message in transit)
+    2. message transmitted over network (TLS used to protect message in transit)
 
-        3. recipient uses sender's public key or shared secret key to decrypt/verify message
+    3. recipient uses sender's public key or shared secret key to decrypt/verify message
 
-        4. recipient can check signature using sender's public key
+    4. recipient can check signature using sender's public key
 
-        5. if decryption/verification is successful, sender's identity is confirmed (authentication) and message integrity is confirmed
+    5. if decryption/verification is successful, sender's identity is confirmed (authentication) and message integrity is confirmed
 
-    - considerations
+- considerations
 
-        - key management
+    - key management
 
-        - cert validity
+    - cert validity
 
-        - timestamps + nonces: use timestamps/nonces (number/bit string used only once in security protocol) to prevent replay attacks (old messages resent to fake current transaction)
+    - timestamps + nonces: use timestamps/nonces (number/bit string used only once in security protocol) to prevent replay attacks (old messages resent to fake current transaction)
 
 
 ## 2. Network Level and Logging
 
 Draw a network, then expect them to raise an issue and have to figure out where it happened.
+
 Describe the Risk Management Framework process and a project where you successfully implemented 
 compliance with RMF.
 
 
 **How does a packet travel between two hosts connected in the same network?**
 
-    - hosts are connected through a switch or a router operating in switch mode
+- hosts are connected through a switch or a router operating in switch mode
 
-    - each host has IP address (logical) and MAC address (physical)
+- each host has IP address (logical) and MAC address (physical)
 
-    - process:
+- process:
 
-        1. host A creates data packet, which includes dest IP address (host B)
+    1. host A creates data packet, which includes dest IP address (host B)
 
-        2. if host A doesn't have host B's MAC address, it broadcasts ARP request on network
+    2. if host A doesn't have host B's MAC address, it broadcasts ARP request on network
 
-        3. ARP request asks which host owns the IP address of host B
+    3. ARP request asks which host owns the IP address of host B
 
-        4. host B responds with MAC address
+    4. host B responds with MAC address
 
-        5. host A encapsulates packet in ethernet frame
+    5. host A encapsulates packet in ethernet frame
 
-        6. frame includes source MAC and destination MAC
+    6. frame includes source MAC and destination MAC
 
-        7. frame sent to network switch
+    7. frame sent to network switch
 
-        8. switch uses MAC address table to determine which port associated with host B's MAC
-        9. switch forwards frame out through port connected to host B
+    8. switch uses MAC address table to determine which port associated with host B's MAC
+    
+    9. switch forwards frame out through port connected to host B
 
-        10. switch uses MAC -> process is efficient and reduces network traffic
+    10. switch uses MAC -> process is efficient and reduces network traffic
 
-        11. host B receives frame, de-encapsulates it to extract packet, processes data
+    11. host B receives frame, de-encapsulates it to extract packet, processes data
 
-        12. if using TCP, host B sends ACK back to host A (using the same process)
+    12. if using TCP, host B sends ACK back to host A (using the same process)
 
-    - involves data link layer and network layer
+- involves data link layer and network layer
 
 
 
 **What are the biggest AWS security vulnerabilities?**
 
-    1. misconfigured S3 buckets
+1. misconfigured S3 buckets
 
-        - S3 buckets with improper access controls
+    - S3 buckets with improper access controls
 
-        - access policies, bucket policies, ACLs, audit S3 configs
+    - access policies, bucket policies, ACLs, audit S3 configs
 
-    2. inadequate UAC
+2. inadequate UAC
 
-        - overly permissive IAM
+     - overly permissive IAM
 
-        - follow least privilege principle, review IAM policies, use IAM roles/conditions
+    - follow least privilege principle, review IAM policies, use IAM roles/conditions
 
-    3. unsecured APIs/endpoints
+3. unsecured APIs/endpoints
 
-        - exposing AWS service APIs/endpoints without proper security can lead to unauth access
+    - exposing AWS service APIs/endpoints without proper security can lead to unauth access
 
-        - secure API endpoints with API Gateway, implement authentication/authorization, use VPC endpoints
+    - secure API endpoints with API Gateway, implement authentication/authorization, use VPC endpoints
 
-    4. weak encryption
+4. weak encryption
 
-        - failure to encrypt data at rest/in transit
+    - failure to encrypt data at rest/in transit
 
-        - use KMS (key management service) and encrypt data in transit (TLS/SSL)
+    - use KMS (key management service) and encrypt data in transit (TLS/SSL)
 
-    5. network segmentation
+5. network segmentation
 
-        - insufficient network segmentation
+    - insufficient network segmentation
 
-        - use VPC (virtual private cloud) + subnetting to segment networks, implement security groups + NACLs (network access control lists)
+    - use VPC (virtual private cloud) + subnetting to segment networks, implement security groups + NACLs (network access control lists)
 
-    6. unpatched/outdated systems
+6. unpatched/outdated systems
 
-        - patch/update EC2 instances (use AWS Systems Manager for patch management)
+    - patch/update EC2 instances (use AWS Systems Manager for patch management)
 
-    7. logging
+7. logging
 
-        - use AWS CloudTrail, CloudWatch, Config for logging + monitoring
+    - use AWS CloudTrail, CloudWatch, Config for logging + monitoring
 
-    8. unmanaged secrets
+8. unmanaged secrets
 
-        - use AWS Secrets Manager or Parameter Store to manage secrets securely
+    - use AWS Secrets Manager or Parameter Store to manage secrets securely
 
-    9. DDoS
+9. DDoS
 
-        - use AWS Shield and AWS WAF to protect against DDoS
+    - use AWS Shield and AWS WAF to protect against DDoS
 
-    10. insecure serverless deployments
+10. insecure serverless deployments
 
-        - serverless architectures (using AWS Lambda) can be vulnerable if not secured
+    - serverless architectures (using AWS Lambda) can be vulnerable if not secured
 
-        - secure function triggers, manage perms correctly, monitor function executions
-
-
-How do web certificates for HTTPS work?
+    - secure function triggers, manage perms correctly, monitor function executions
 
 
 **Is ARP UDP or TCP?**
     
-    - neither
+- neither
 
-    - ARP operates on layer 2 (link layer)
+- ARP operates on layer 2 (link layer)
 
-    - TCP/UDP operate on layer 4 (transport layer)
+- TCP/UDP operate on layer 4 (transport layer)
 
-    - ARP maps a network address to a physical address (IP address -> MAC address)
+- ARP maps a network address to a physical address (IP address -> MAC address)
 
-    - devices maintain an ARP table/cache, storing maps of IP/MAC
+- devices maintain an ARP table/cache, storing maps of IP/MAC
 
 
 **Explain what information is added to a packet at each stop of the 7 layer OSI model.**
 
-    1. physical layer
+1. physical layer
 
-        - no information added to data
+    - no information added to data
 
-    2. data link layer
+2. data link layer
 
-        - adds MAC (media access control) addresses to data, creating a frame
+    - adds MAC (media access control) addresses to data, creating a frame
 
-        - includes source/dest MAC addresses
+    - includes source/dest MAC addresses
 
-    3. network layer
+3. network layer
 
-        - adds IP addresses and other routing info, creating a packet
+    - adds IP addresses and other routing info, creating a packet
 
-        - includes source/dest IP addresses
+    - includes source/dest IP addresses
 
-    4. transport layer
+4. transport layer
 
-        - adds TCP/UDP headers
+    - adds TCP/UDP headers
 
-        - TCP: includes source/dest port numbers, sequence and acknowledgement numbers, flags for controlling data flow
+    - TCP: includes source/dest port numbers, sequence and acknowledgement numbers, flags for controlling data flow
 
-        - UDP: includes just port numbers and length field
+    - UDP: includes just port numbers and length field
 
-    5. session layer
+5. session layer
 
-        - adds data related to session establishment, management, termination
+    - adds data related to session establishment, management, termination
 
-        - includes session IDs, auth tokens (often implemented in application protocol)
+    - includes session IDs, auth tokens (often implemented in application protocol)
 
-    6. presentation layer
+6. presentation layer
 
-        - handles data encryption, compression, translation
+    - handles data encryption, compression, translation
 
-        - might encrypt data before transmission and decrypt upon reception (TLS/SSL)
+    - might encrypt data before transmission and decrypt upon reception (TLS/SSL)
 
-    7. application layer
+7. application layer
 
-        - adds app-specific data
+    - adds app-specific data
 
-        - varies depending on protocol (HTTP/FTP/SMTP)
+    - varies depending on protocol (HTTP/FTP/SMTP)
 
-        - includes protocol-specific request/response data
-
-
-**How does an active directory work? Do you know how Single Sign-On works?**
-
-    1. **AD**
-
-        - domain controller (DC): 
-
-            - authenticates/authorizes all users and computers in a windows domain
-
-            - enforces security policies + installs software updates across network
-
-        - data store:
-
-            - AD stores info about objects (users, groups, printers, hosts) in data store
-
-            - data store is hierarchical and follows X.500 standard
-
-        - LDAP:
-
-            - LDAP facilitates communication between clients + servers
-
-        - authentication/authorization:
-
-            - user logs into computer connected to AD -> creds sent to DC
-
-            - DC then authenticated user and provides access to network based on permissions
-
-    2. **SSO**
-
-        - establishes trusted relationship between service provider (app) and ID provider (ID/credential manager)
-
-        - authentication
-
-            - user logs into SSO enabled app -> redirected to ID provider
-
-            - successful authentication -> ID provider sends token (SAML/OAuth) back to service provider (app)
-
-            - token proves user has been authenticated, service provider grants access
-
-        - subsequent logins
-
-            - user doesn't need to re-enter creds for other SSO-enabled apps during session
-
-            - ID provider will provide tokens to any additional apps the user accesses
-
-    3. **AD + SSO**
-
-        - AD serves as ID provider for SSO
-
-        - user logging into workstation -> authenticated to access other apps linked via SSO
-
-        - centralized mgmt: AD + SSO simplifies mgmt of user creds + access, changes made in directory are reflected across network/apps
-
-        - security: convenience means compromising a user's creds could give attacker access to multiple systems (use MFA!)
+    - includes protocol-specific request/response data
 
 
-    4. **cloud**
+**How does an active directory (AD) work? Do you know how Single Sign-On (SSO) works?**
 
-        - ADaaS: (AWS Directory Service, Azure AD)
+1. **AD**
 
-        - hybrid envs: on-prem AD extended or synchronized with cloud-based AD (seamless user mgmt + auth across the environments)
+    - domain controller (DC): 
 
-        - integration: cloud-based AD can manage users/perms for various cloud resources
+        - authenticates/authorizes all users and computers in a windows domain
 
-        - cloud-based IdP: SSO in cloud involves cloud-based IdP (Okta, OneLogin, AWS Cognito, Azure AD, Google Identity), they manage user IDs and auth across multiple apps
+        - enforces security policies + installs software updates across network
 
-        - SSO protocols: SAML, OAuth, OpenID Connect
+    - data store:
 
-        - SSO handles auth tokens/perms once user is auth'd by IdP
+        - AD stores info about objects (users, groups, printers, hosts) in data store
 
-        - greater scalability + accessibility
+        - data store is hierarchical and follows X.500 standard
 
-        - due to distributed nature, security/privacy/encryption (MFA) is super important
+    - LDAP:
+
+        - LDAP facilitates communication between clients + servers
+
+    - authentication/authorization:
+
+        - user logs into computer connected to AD -> creds sent to DC
+
+        - DC then authenticates user and provides access to network based on permissions
+
+2. **SSO**
+
+    - establishes trusted relationship between service provider (app) and ID provider (ID/credential manager)
+
+    - authentication
+
+        - user logs into SSO enabled app -> redirected to ID provider
+
+        - successful authentication -> ID provider sends token (SAML/OAuth) back to service provider (app)
+
+        - token proves user has been authenticated, service provider grants access
+
+    - subsequent logins
+
+        - user doesn't need to re-enter creds for other SSO-enabled apps during session
+
+        - ID provider will provide tokens to any additional apps the user accesses
+
+3. **AD + SSO**
+
+    - AD serves as ID provider for SSO
+
+    - user logging into workstation -> authenticated to access other apps linked via SSO
+
+    - centralized mgmt: AD + SSO simplifies mgmt of user creds + access, changes made in directory are reflected across network/apps
+
+    - security: convenience means compromising a user's creds could give attacker access to multiple systems (use MFA!)
 
 
+4. **cloud**
+
+    - ADaaS: (AWS Directory Service, Azure AD)
+
+    - hybrid envs: on-prem AD extended or synchronized with cloud-based AD (seamless user mgmt + auth across the environments)
+
+    - integration: cloud-based AD can manage users/perms for various cloud resources
+
+    - cloud-based IdP: SSO in cloud involves cloud-based IdP (Okta, OneLogin, AWS Cognito, Azure AD, Google Identity), they manage user IDs and auth across multiple apps
+
+    - SSO protocols: SAML, OAuth, OpenID Connect
+
+    - SSO handles auth tokens/perms once user is auth'd by IdP
+
+    - greater scalability + accessibility
+
+    - due to distributed nature, security/privacy/encryption (MFA) is super important
 
 
-How do you harden a system? How to you elevate permissions?
+**How do you harden a system? How to you elevate permissions?**
+
+- **system hardening**
+
+    1. update + patch
+
+        - regularly patch OS and all software
+
+    2. minimize installed software
+
+        - remove/disable unnecessary software, services, features not essential to system's function
+
+    3. configure security settings
+
+        - configure firewalls, IDS, security-enhanced OS (SELinux)
+
+    4. user account management
+
+        - principle of least privilege
+
+        - strong password policies + MFA
+
+    5. secure network connections
+
+        - disable unused ports, encrypt traffic, use VPNs for secure remote access
+
+    6. regular security auditing
+
+    7. data encryption (in transit + at rest)
+
+    8. backup + disaster recovery plans
+
+- **elevating permissions**
+
+    1. windows
+
+        - run as administrator (right click)
+
+        - UAC: respond to user account control prompts when performing tasks that require elevated privileges
+
+        - use `runas` command to execute commands with different creds
+
+    2. *nix
+
+        - `sudo`: superuser or another user specified in sudoers file
+
+        - `su`: switch to another user (need password)
+
+        - root access: directly logging in as root gives full admin privs (discouraged)
 
 **What is traceroute? Explain it in details.**
 
-    - `tracert` is a network diagnostic tool used to determine the path packets take to reach a destination IP
+- `tracert` is a network diagnostic tool used to determine the path packets take to reach a destination IP
 
-    - how it works:
+- how it works:
 
-        1. packet with TTL:
+    1. packet with TTL:
 
-            - traceroute sends out a series of packets to dest IP
+        - traceroute sends out a series of packets to dest IP
 
-            - each set of packets has an incrementally increasing TTL (starting from 1)
+        - each set of packets has an incrementally increasing TTL (starting from 1)
 
-            - TTL is a field in the IP packet header, specifies how many hops (routers) the packet can traverse before it's discarded/returned
+        - TTL is a field in the IP packet header, specifies how many hops (routers) the packet can traverse before it's discarded/returned
 
-        2. TTL expiry + ICMP messages
+    2. TTL expiry + ICMP messages
 
-            - each router along the path decrements TTL by 1
+        - each router along the path decrements TTL by 1
 
-            - when TTL reaches 0, router stops forwarding packet and sends back ICMP "time exceeded" message to source
+        - when TTL reaches 0, router stops forwarding packet and sends back ICMP "time exceeded" message to source
 
-            - ICMP message includes router IP
+        - ICMP message includes router IP
 
-        3. incrementing TTL values
+    3. incrementing TTL values
 
-            - traceroute increments TTL with each set of packets sent
+        - traceroute increments TTL with each set of packets sent
 
-            - this process reveals path, hop by hop
+        - this process reveals path, hop by hop
 
-            - with each increase in TTL, packets are designed to expire at next hop in path, causing each router along path to return ICMP message
+        - with each increase in TTL, packets are designed to expire at next hop in path, causing each router along path to return ICMP message
 
-        4. determining path + transit delays
+    4. determining path + transit delays
 
-            - by examining the return time of each ICMP message, traceroute calculates round-trip time (RTT) for each hop
+        - by examining the return time of each ICMP message, traceroute calculates round-trip time (RTT) for each hop
 
-            - this helps diagnose network latency issues and pinpoint where delays occur
+        - this helps diagnose network latency issues and pinpoint where delays occur
 
-        5. completion
+    5. completion
 
-            - process continues until packets reach destination or max hops are reached, preventing infinite loops
+        - process continues until packets reach destination or max hops are reached, preventing infinite loops
 
-            - if packet reach dest, dest host returns ICMP "echo reply", signalling end of traceroutes
+        - if packet reach dest, dest host returns ICMP "echo reply", signalling end of traceroutes
 
-    - output: each hop, IP address, RTT for each packet sent, hop's hostname
+- output: each hop, IP address, RTT for each packet sent, hop's hostname
 
-    - uses:
+- uses:
 
-        - network troubleshooting
+    - network troubleshooting
 
-        - path analysis
+    - path analysis
 
-        - performance evaluation
+    - performance evaluation
 
-    - limitations:
+- limitations:
 
-        - firewalls/filters
+    - firewalls/filters
 
-        - asymmetric routing (return path can be different)
+    - asymmetric routing (return path can be different)
 
-        - limited visibility (no info about switches, load balancers, other network devices)
+    - limited visibility (no info about switches, load balancers, other network devices)
 
 
-What is SYN/ACK and how does it work?
+**What is SYN/ACK and how does it work?**
+
+- acknowledges the receipt of the SYN packet by including an acknowledgement number (client's ISN + 1)
+
+- also contains server's own ISN
 
 You got the memory dump of a potentially compromised system, how are you going to approach its analysis?
 
-How would you detect a DDOS attack?
+**How would you detect a DDOS attack?**
+
+- indicators
+
+    1. unusual traffic volume
+
+    2. traffic origin
+
+    3. traffic type + consistency (eg: SYN requests in a SYN flood)
+
+    4. service perfomance degradation
+
+    5. unusual patterns in network flow data
+
+- tools + techniques
+
+    1. traffic analysis tools
+
+    2. IDS/IPS
+
+    3. rate-based IPS
+
+    4. anomaly detection systems
+
+    5. firewalls + routers (might be ineffective for large-scale attacks)
+
+    6. log analysis
+
+- mitigations
+
+    1. blocking + filtering rules
+
+    2. collab with ISP
+
+    3. cloud-based DDoS protection services (Cloudflare/AWS Shield)
 
 **How does the kernel know which function to call for the user?**
 
-    1. syscalls:
+1. syscalls:
 
-        - syscalls is the mechanism thru which user-space apps interact with kernel
+    - syscalls is the mechanism thru which user-space apps interact with kernel
 
-        - when a user needs to perform an op that requires kernel privs (accessing hardware, file systems), it makes a syscall
+    - when a user needs to perform an op that requires kernel privs (accessing hardware, file systems), it makes a syscall
 
-        - a specific CPU instruction triggers a switch from user mode to kernel mode (`int` on x86 architectures)
+    - a specific CPU instruction triggers a switch from user mode to kernel mode (`int` on x86 architectures)
 
-        - this instruction includes an ID for the desired syscall
+    - this instruction includes an ID for the desired syscall
 
-    2. interrupts
+2. interrupts
 
-        - CPU instruction triggers an interrupt, control then passed to kernel
+    - CPU instruction triggers an interrupt, control then passed to kernel
 
-        - kernel has an interrupt handler for these syscall interrupts
+    - kernel has an interrupt handler for these syscall interrupts
 
-        - kernel maintains a syscall table (mapping syscall IDs -> corresponding kernel func addresses)
+    - kernel maintains a syscall table (mapping syscall IDs -> corresponding kernel func addresses)
 
-        - interrupt handler uses syscall ID to look up appropriate func address in syscall table
+    - interrupt handler uses syscall ID to look up appropriate func address in syscall table
 
-    3. execution
+3. execution
 
-        - user program executes syscall instruction, specifying syscall number
+    - user program executes syscall instruction, specifying syscall number
 
-        - CPU switches to kernel mode, syscall interrupt handler in kernel takes control
+    - CPU switches to kernel mode, syscall interrupt handler in kernel takes control
 
-        - handler looks up syscall table, finds funcaddress and calls it
+    - handler looks up syscall table, finds funcaddress and calls it
 
-        - control returned to user-space program (with some return value from syscall)
+    - control returned to user-space program (with some return value from syscall)
 
-    4. security
+4. security
 
-        - kernel validates params passed with syscalls to prevent security breaches
+    - kernel validates params passed with syscalls to prevent security breaches
 
-        - kernel checks whether calling process has sufficient privs to perform requested operation
+    - kernel checks whether calling process has sufficient privs to perform requested operation
 
 
 How would you go about reverse-engineering a custom protocol packet?
@@ -1738,175 +2066,175 @@ How would you go about reverse-engineering a custom protocol packet?
 
 **Do you know what XXE is?**
 
-    - XML External Entity
+- XML External Entity
 
-    - attacker exploits XML parsers that process external entity references within xml documents
+- attacker exploits XML parsers that process external entity references within xml documents
 
-    - attacker injects malicious xml content that includes references to external entities (can be files on server, or even network calls to external systems)
+- attacker injects malicious xml content that includes references to external entities (can be files on server, or even network calls to external systems)
 
-    - misconfigured/outdated XML parsers allow parsing of external entities
+- misconfigured/outdated XML parsers allow parsing of external entities
 
-    - apps accept xml input directly from untrusted sources (without proper sanitization/security checks)
+- apps accept xml input directly from untrusted sources (without proper sanitization/security checks)
 
-    - can lead to unauth'd access to sensitive data
+- can lead to unauth'd access to sensitive data
 
-    - DoS
+- DoS
 
-    - SSRF: can be used to make server perform unintended requests to other systems
+- SSRF: can be used to make server perform unintended requests to other systems
 
-    - mitigations:
+- mitigations:
 
-        - disable external entities + DTDs (document type definitions)
+    - disable external entities + DTDs (document type definitions)
 
-        - input validation + sanitization
+    - input validation + sanitization
 
-        - less complex data formats (JSON)
+    - less complex data formats (JSON)
 
-        - patch + update libraries and parsers
+    - patch + update libraries and parsers
 
-        - testing in the SDLC
+    - testing in the SDLC
 
 
 ## 4. Databases
 
 **which db would you recommend to a client for security reasons, and why?**
 
-    - various factors: needs, nature of data, scale of ops, compliance reqs, existing infrastructure
+- various factors: needs, nature of data, scale of ops, compliance reqs, existing infrastructure
 
-    - oracle:
+- oracle:
 
-        - advanced security options like Transparent Data Encryption, Data Redaction, DB Vault, etc.
+    - advanced security options like Transparent Data Encryption, Data Redaction, DB Vault, etc.
 
-        - strong access controls, encryption at rest/in transit, robust auditing capabilities
+    - strong access controls, encryption at rest/in transit, robust auditing capabilities
 
-        - best for:
+    - best for:
             
-            - large enterprises with complex reqs + budget
+        - large enterprises with complex reqs + budget
 
-            - strong compliance adherence (GDPR, HIPAA)
+        - strong compliance adherence (GDPR, HIPAA)
 
-    - MS SQL:
+- MS SQL:
 
-        - provides Always Encrypted feature, Row-Level Security, Dynamic Data Masking
+    - provides Always Encrypted feature, Row-Level Security, Dynamic Data Masking
 
-        - strong integration with windows envs + AD
+    - strong integration with windows envs + AD
 
-        - best for:
+    - best for:
 
-            - businesses heavily integrated into microsoft ecosystem
+        - businesses heavily integrated into microsoft ecosystem
 
-            - scenarios where windows-based auth + easy integration with other microsoft products are beneficial
+        - scenarios where windows-based auth + easy integration with other microsoft products are beneficial
 
-    - MySQL + PostgreSQL
+- MySQL + PostgreSQL
 
-        - SSL support, password encryption, user priv management (MySQL)
+    - SSL support, password encryption, user priv management (MySQL)
 
-        - robust access control, column/row-level security, support for MFA + certs (PostgreSQL)
+    - robust access control, column/row-level security, support for MFA + certs (PostgreSQL)
 
-        - best for:
+    - best for:
 
-            - open source solutions for small/medium sized businesses
+        - open source solutions for small/medium sized businesses
 
-            - postgreSQL has more advanced security features
+        - postgreSQL has more advanced security features
 
-    - MongoDB
+- MongoDB
 
-        - field-level encryption, auditing, authentication, authorization
+    - field-level encryption, auditing, authentication, authorization
 
-        - TLS/SSL for encryption in transit, and encryption at rest capabilities
+    - TLS/SSL for encryption in transit, and encryption at rest capabilities
 
-        - best for:
+    - best for:
 
-            - scenarios requiring NoSQL with flexible schemas (large, unstructured dataset)
+        - scenarios requiring NoSQL with flexible schemas (large, unstructured dataset)
 
-            - projects needing scalable, high-perf data storage with robust security
+        - projects needing scalable, high-perf data storage with robust security
 
-    - Amazon Aurora
+- Amazon Aurora
 
-        - inherits security measures from AWS, like network isolation (Amazon VPC), encryption at rest (AWS Key Management Service), automated backups
+    - inherits security measures from AWS, like network isolation (Amazon VPC), encryption at rest (AWS Key Management Service), automated backups
 
-        - best for:
+    - best for:
             
-            - businesses looking for cloud-native db with seamless scalability + integration with AWS 
+        - businesses looking for cloud-native db with seamless scalability + integration with AWS 
             
-            - envs where high availability/durability are priorities
+        - envs where high availability/durability are priorities
 
 
 **Our DB was stolen/exfiltrated. It was secured with one round of sha256 with a static salt. What do we do now? Are we at risk? What do we change?**
 
-    1. immediate response:
+1. immediate response:
 
-        - containment + assessment: 
+    - containment + assessment: 
 
-            - isolate affected systems (disconnect from network)
+        - isolate affected systems (disconnect from network)
 
-            - assess extent of breach (determine which parts of breach were stolen and nature of data involved)
+        - assess extent of breach (determine which parts of breach were stolen and nature of data involved)
 
-        - notification + legal compliance
+    - notification + legal compliance
 
-            - notify relevant parties
+        - notify relevant parties
 
-            - review legal obligations under data protection laws (GDPR, HIPAA)
+        - review legal obligations under data protection laws (GDPR, HIPAA)
 
-    2. analyze risk
+2. analyze risk
 
-        - SHA256 with static salt:
+    - SHA256 with static salt:
 
-            - vulnerability: using a static salt means once the salt is known, it can be used to crack all hashed passwords more efficiently
+        - vulnerability: using a static salt means once the salt is known, it can be used to crack all hashed passwords more efficiently
 
-            - risk: moden GPUs can compute hash functions at high speed, making it feasible to crach a large number of hashes
+        - risk: moden GPUs can compute hash functions at high speed, making it feasible to crach a large number of hashes
 
-        - data at risk:
+    - data at risk:
 
-            - password reuse: users with recycled passwords across different services can have their accounts compromised
+        - password reuse: users with recycled passwords across different services can have their accounts compromised
 
-            - sensitive data exposure: can lead to identity theft, fraud, espionage
+        - sensitive data exposure: can lead to identity theft, fraud, espionage
 
-    3. mitigation + strengthening security
+3. mitigation + strengthening security
 
-        - password reset + user comms
+    - password reset + user comms
 
-            - force password resets
+        - force password resets
 
-            - communicate transparently
+        - communicate transparently
 
-        - improve hashing strategy
+    - improve hashing strategy
 
-            - use unique salts: each hash calculation is unique, reducing risk of mass-decryption
+        - use unique salts: each hash calculation is unique, reducing risk of mass-decryption
 
-            - stronger hash functions: bcrypt, designed for securing passwords (slower, cost factor for added security)
+        - stronger hash functions: bcrypt, designed for securing passwords (slower, cost factor for added security)
 
-        - overall security
+    - overall security
 
-            - regular audits
+        - regular audits
 
-            - access controls
+        - access controls
 
-            - monitor suspicious activity
+        - monitor suspicious activity
 
-        - data encryption
+    - data encryption
 
-            - encrypt sensitive data (at rest) beyond hashing passwords
+        - encrypt sensitive data (at rest) beyond hashing passwords
 
-            - key management
+        - key management
 
-        - IR plan
+    - IR plan
 
-            - clear plan for future incidents
+        - clear plan for future incidents
 
-    4. long term changes
+4. long term changes
 
-        - security culture + training
+    - security culture + training
 
-            - employee training
+        - employee training
 
-            - security awareness
+        - security awareness
 
-        - security reviews and updates
+    - security reviews and updates
         
-            - stay updated
+        - stay updated
 
-            - adaptive security posture
+        - adaptive security posture
 
 
 ## 5. Tools and Games
@@ -2121,26 +2449,77 @@ How would you go about reverse-engineering a custom protocol packet?
 
 **Code review a project and look for the vulnerability.**
 
-   https://github.com/dub-flow/appsec-challenges/tree/main
+   https://github.com/bilals12/interviewpractice/blob/main/codereviews.md
 
-- If I hand you a repo of source code to security audit what’s the first few things you would do?
+
+**If I hand you a repo of source code to security audit what’s the first few things you would do?**
+
+1. understand scope + context
+
+    - understand app architecture + components (frameworks, libraries, 3rd party services)
+
+    - sensitive operations (user authentication, data processing, network communication)
+
+2. local testing env
+
+    - clone repo
+
+    - controlled, isolated env (away from prod)
+
+3. dependency + config review
+
+    - examine list of external libs/packages (identify outdated libraries or those with known vulns)
+
+    - review config files (insecure settings, hardcoded data like API keys or passwords)
+
+4. static analysis
+
+    - use SAST tools to scan for issues/vulns like buffer overflows, SQLi, XSS
+
+    - manual review
+
+5. code quality assessment
+
+    - readability, maintanability, documentation
+
+    - error handling (exception handling, logging practices)
+
+6. security best practices
+
+    - look for strong password policies, secure session management, proper access controls
+
+    - examine how data is validated, sanitized, processed (proper input validation to prevent injection attacks)
+
+7. dynamic analysis
+
+    - test app in dynamic state
+
+    - use DAST tools to find vulns that are apparent when app is running
+
+8. document findings + reports
+
+    - categorize by severity + impact
+
+    - recommendations
+
+9. discuss findings with dev team
 
 
 **Can I write a tool that would search our Github repos for secrets, keys, etc.? AWS?**
 
 **github**:
 
-        1. define search criteria (API keys, db creds, ssh keys, private tokens)
+    1. define search criteria (API keys, db creds, ssh keys, private tokens)
 
-        2. API integration (personal access token)
+    2. API integration (personal access token)
 
-        3. scanning logic (clone repos, scan them, regex/pattern matching to identify potential secrets)
+    3. scanning logic (clone repos, scan them, regex/pattern matching to identify potential secrets)
 
-        4. false positives (differentiate between real secrets and false positives, using allowlists or heuristics)
+    4. false positives (differentiate between real secrets and false positives, using allowlists or heuristics)
 
-        5. notification (only the relevant stakeholders, maintain logs/reports)
+    5. notification (only the relevant stakeholders, maintain logs/reports)
 
-        6. continuous scanning (run periodically or trigger when push/pull)
+    6. continuous scanning (run periodically or trigger when push/pull)
 
         ```python
 
@@ -2178,26 +2557,26 @@ How would you go about reverse-engineering a custom protocol packet?
         
 **AWS**
 
-        1. AWS API/SDK: authenticate using IAM roles
+    1. AWS API/SDK: authenticate using IAM roles
 
-        2. scanning AWS: S3 buckets, EC2 instances, RDS dbs, CloudFormation templates, Lambda functions
+    2. scanning AWS: S3 buckets, EC2 instances, RDS dbs, CloudFormation templates, Lambda functions
 
-        3. env config: check for misconfigs, such as open S3 buckets or overly permissive IAM policies
+    3. env config: check for misconfigs, such as open S3 buckets or overly permissive IAM policies
 
-        4. secrets manager/param store: check if secrets manager/param store is being properly used for 
+    4. secrets manager/param store: check if secrets manager/param store is being properly used for 
         storing secrets (instead of hardcoding in configurations)
 
-        5. integration with cloudtrail: use cloudtrail logs to monitor for unusual access patterns
+    5. integration with cloudtrail: use cloudtrail logs to monitor for unusual access patterns
 
 considerations:
 
-        - rate limiting + API quotas
+    - rate limiting + API quotas
 
-        - secure tool
+    - secure tool
 
-        - regular updates/maint
+    - regular updates/maint
 
-        - user training
+    - user training
 
 
 
@@ -2207,56 +2586,56 @@ considerations:
 
 **How would you analyze a suspicious email link?**
 
-    - visual inspection
+- visual inspection
 
-    - hover to preview URL
+- hover to preview URL
 
-    - link scanners (VirusTotal, URLScan, URLVoid, Transparency Report)
+- link scanners (VirusTotal, URLScan, URLVoid, Transparency Report)
 
-    - unshorten URL (unshorten.it) to reveal destination
+- unshorten URL (unshorten.it) to reveal destination
 
-    - source code of email (look for javascript/embedded scripts)
+- source code of email (look for javascript/embedded scripts)
 
-    - open link in sandbox
+- open link in sandbox
 
-    - DNS checks (lookup)
+- DNS checks (lookup)
 
-    - IP blacklists
+- IP blacklists
 
-    - inspect email headers (determine source)
+- inspect email headers (determine source)
 
-    - report
+- report
 
 
 ## 7. Compliance
 
 **What is the NIST framework and why is it influential?**
 
-    - core: Identify, Protect, Detect, Respond, Recover
+- core: Identify, Protect, Detect, Respond, Recover
 
-    - implementation: describes degree to which cybersecurity risk management practices exhibit 
+- implementation: describes degree to which cybersecurity risk management practices exhibit 
     characteristics defined in framework (Partial, Risk-Informed, Repeatable, Adaptive)
 
-    - profiles: used to plan cybersecurity improvements and assess impact of improvements
+- profiles: used to plan cybersecurity improvements and assess impact of improvements
 
-    - why it's influential:
+- why it's influential:
 
-        1. flexibility + adaptability
+    1. flexibility + adaptability
 
-        2. risk-based approach
+    2. risk-based approach
 
-        3. common language (systematic methodology)
+    3. common language (systematic methodology)
 
-        4. compliance + industry standard
+    4. compliance + industry standard
 
-        5. global recognition
+    5. global recognition
 
-        6. continuous improvement
+    6. continuous improvement
 
-    - uses:
+- uses:
 
-        - assessment
+    - assessment
 
-        - risk management
+    - risk management
 
-        - vendor management
+    - vendor management
