@@ -2509,64 +2509,63 @@ How would you go about reverse-engineering a custom protocol packet?
 
 **github**:
 
-    1. define search criteria (API keys, db creds, ssh keys, private tokens)
+1. define search criteria (API keys, db creds, ssh keys, private tokens)
 
-    2. API integration (personal access token)
+2. API integration (personal access token)
 
-    3. scanning logic (clone repos, scan them, regex/pattern matching to identify potential secrets)
+3. scanning logic (clone repos, scan them, regex/pattern matching to identify potential secrets)
 
-    4. false positives (differentiate between real secrets and false positives, using allowlists or heuristics)
+4. false positives (differentiate between real secrets and false positives, using allowlists or heuristics)
 
-    5. notification (only the relevant stakeholders, maintain logs/reports)
+5. notification (only the relevant stakeholders, maintain logs/reports)
 
-    6. continuous scanning (run periodically or trigger when push/pull)
+6. continuous scanning (run periodically or trigger when push/pull)
 
-        ```python
+```python
 
-        import requests
+import requests
 
-        # Constants and configurations
-        GITHUB_API = "https://api.github.com"
-        TOKEN = "your_personal_access_token"
-        HEADERS = {"Authorization": f"token {TOKEN}"}
-        ORG_NAME = "your_org_name"
+# Constants and configurations
+GITHUB_API = "https://api.github.com"
+TOKEN = "your_personal_access_token"
+HEADERS = {"Authorization": f"token {TOKEN}"}
+ORG_NAME = "your_org_name"
 
-        # Regex patterns for secrets
-        SECRET_PATTERNS = ["regex_for_api_key", "regex_for_ssh_key", ...]
+# Regex patterns for secrets
+SECRET_PATTERNS = ["regex_for_api_key", "regex_for_ssh_key", ...]
 
-        def get_repos():
-            """Get a list of repositories from GitHub"""
-            response = requests.get(f"{GITHUB_API}/orgs/{ORG_NAME}/repos", headers=HEADERS)
-            return response.json()  # Parse and return the list of repositories
+def get_repos():
+    """Get a list of repositories from GitHub"""
+    response = requests.get(f"{GITHUB_API}/orgs/{ORG_NAME}/repos", headers=HEADERS)
+    return response.json()  # Parse and return the list of repositories
 
-        def scan_repo(repo_name):
-            """Scan a single repository for secrets"""
-            # Logic to clone or access repo content
-            # For each file in the repo, search for patterns that match secrets
-            # This can be done using regex and scanning through file content
-            pass
+def scan_repo(repo_name):
+    """Scan a single repository for secrets"""
+    # Logic to clone or access repo content
+    # For each file in the repo, search for patterns that match secrets
+    # This can be done using regex and scanning through file content
+    pass
 
-        def main():
-            repos = get_repos()
-            for repo in repos:
-                scan_repo(repo['name'])
+def main():
+    repos = get_repos()
+    for repo in repos:
+        scan_repo(repo['name'])
 
-        if __name__ == "__main__":
-            main()
-        ```
+if __name__ == "__main__":
+    main()
+```
         
 **AWS**
 
-    1. AWS API/SDK: authenticate using IAM roles
+1. AWS API/SDK: authenticate using IAM roles
 
-    2. scanning AWS: S3 buckets, EC2 instances, RDS dbs, CloudFormation templates, Lambda functions
+2. scanning AWS: S3 buckets, EC2 instances, RDS dbs, CloudFormation templates, Lambda functions
 
-    3. env config: check for misconfigs, such as open S3 buckets or overly permissive IAM policies
+3. env config: check for misconfigs, such as open S3 buckets or overly permissive IAM policies
 
-    4. secrets manager/param store: check if secrets manager/param store is being properly used for 
-        storing secrets (instead of hardcoding in configurations)
+4. secrets manager/param store: check if secrets manager/param store is being properly used for storing secrets (instead of hardcoding in configurations)
 
-    5. integration with cloudtrail: use cloudtrail logs to monitor for unusual access patterns
+5. integration with cloudtrail: use cloudtrail logs to monitor for unusual access patterns
 
 considerations:
 
