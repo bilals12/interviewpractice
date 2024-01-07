@@ -1,8 +1,4 @@
-# Basic Level
-
-These questions require fundamental knowledge of security concepts and are usually theoretical:
-
-## 1. Encryption and Authentication
+# 1. Encryption and Authentication
 
 **What is the difference between authentication vs authorization name spaces (like multi-tenant clouds or K8)?**
 
@@ -32,6 +28,7 @@ These questions require fundamental knowledge of security concepts and are usual
 
         1. privesc: exploit vulns to gain higher privs than authorized
         2. role conflicts: conflicting roles within different namespaces can cause ambiguities, which might lead to unintentional access to sensitive data.
+   
    **implications**: 
 
    - isolation: isolation between namespaces
@@ -150,752 +147,6 @@ These questions require fundamental knowledge of security concepts and are usual
     4. not all protocols/cipher suites support PFS
 
     5. quantum attacks
-
-
-## 2. Network Level and Logging
-
-**What are common ports involving security, what are the risks and mitigations?**
-
-- **80 (HTTP)**: 
-
-    1. risk: unencrypted web traffic, intercepting/sniffing data
-
-    2. mitigation: use HTTPS and implement HSTS (http strict transport security) to enforce secure connections
-
-- **443 (HTTPS)**:
-
-    1. risk: vulnerable to misconfigured SSL/TLS, outdated encryption protocols, cipher suites
-
-    2. mitigation: keep SSL/TLS certs updated, use strong encryption (TLS1.2/1.3), disable older protocols (SSLv3)
-
-- **20, 21 (FTP)**:
-
-    1. risk: data transmitted in plaintext, vulnerable to interception + unauthorized data access
-
-    2. mitigation: use SFTP (ssh file transfer protocol) or FTPS (ftp secure) for encrypted transfers
-
-- **22 (SSH)**: 
-
-    1. risk: brute force target, attackers can gain shell access
-
-    2. mitigation: strong passwords, key-based authentication, 2FA, change default port
-
-- **23 (TELNET)**:
-
-    1. risk: similar to FTP
-
-    2. mitigation: replace with SSH
-
-- **25 (SMTP)**:
-
-    1. risk: can be exploited to send spam/phishing emails
-
-    2. mitigation: use SMTPS (port 465) for secure emails, implement SPF (sender policy framework), DKIM (domainkeys identified mail), DMARC (domain based message authentication reporting conformance)
-
-- **53 (DNS)**:
-
-    1. risk: DNS spoofing/poisoning can redirect traffic to malicious sites
-
-    2. mitigation: use DNSSEC for verifying authenticity of DNS data
-
-- **3389 (RDP)**:
-
-    1. risk: target for brute force/credential stuffing, can grant full control
-
-    2. mitigation: use VPNs, enable NLA (network level auth), limit RDP via firewalls
-
-    extra:
-
-    - change default ports to non standard ports
-
-    - configure firewalls to restrict access to necessary ports
-
-    - regular security audits + monitor network traffic
-
-    - software + firmware updates
-
-    - network segmentation
-
-
-
-**What is a subnet and how is it useful in security?**
-
-- segmentation: dividing a larger network into smaller subnets, each subnet operates as a distinct network within the larger infrastructure
-
-- IP addressing: range of IP addresses allocated within the network (subnet's network boundary)
-
-- **subnet mask**: used to divide the IP addresses into a network and host component; defines network range within larger network
-
-- scheme: contiguous IP addresses (class C: 192.168.1.0 - 192.168.1.255)
-
-- configured by routers and switches
-
-- VLANs often used with subnets to enhance network management + security
-
-- public vs. private: public subnets can interact with the internet, private subnets are for internal network resources
-
-- security:
-
-    1. containment of threats
-
-    2. reduced attack surface
-
-- access:
-
-    1. subnets can have specific access controls
-
-    2. enhanced monitoring
-
-- compliance:
-
-    1. subnets help in segregrating sensitive data
-
-    2. isolating critical servers/dbs -> exposure is limited
-
-- edge cases:
-
-    1. oversegmentation: network complexity -> difficult to manage
-
-    2. cross-subnet access: misconfigured access controls -> unauthorized access
-
-    3. VPN: understanding how VPNs interact with subnets
-
-**Explain the difference between TCP and UDP. Which is more secure and why?**
-
-- **TCP**:
-
-    - connection oriented: establishes connection before transmission (3-way handshake)
-
-    - reliable delivery: all packets must be delivered accurately and in the correct order (packet sequencing, acknowledgements, retransmission of lost packets)
-
-    - applications where reliability and order are crucial (HTTPS, FTP, SMTP)
-
-    - more secure than UDP (establishes connection and confirms packet delivery)
-
-    - subject to attacks like SYN flooding, SYNACK spoofing, session hijacking
-
-- **UDP**:
-
-    - connectionless: sends packets (datagrams) independently
-
-    - unreliable delivery: no acknowledgement, retransmission. no guarantee of delivery, order, integrity
-
-    - applications where speed > reliability (video streaming, online gaming, VoIP)
-
-    - less secure than TCP (susceptible to spoofing/reflection attacks eg: send UDP packets with a forged IP address, leading to a reflection attack)
-
-    - no built-in mechanism for integrity or authenticity
-
-- What is the TCP three-way handshake?
-
-    1. SYN (synchronize):
-
-    - the client sends a TCP packet with the SYN flag set to the server.
-
-    - the packet indicates an initiation of a connection request and contains an ISN (initial sequence number) generated by the client.
-
-    - the client asks the server to acknowledge (ACK) this sequence number.
-    
-    2. SYN-ACK (synchronize-acknowledge)
-    - the server then responds with a TCP packet that has both SYN and ACK flags set.
-    - this acknowledges the client’s sequence number and also contains the server’s own ISN.
-    
-    3. ACK (acknowledge)
-    - the client then sends a final ACK packet to acknowledge the client’s ISN.
-    - this completes the handshake, and both parties now exchange data, in both directions.
-
-
-**What is the purpose of TLS?**
-
-- encryption: established with a combination of symmetric and asymmetric cryptography.
-
-- authentication: digital certificates used to ensure parties are authenticated
-
-- integrity: mechanisms in place to ensure data has not been corrupted/altered during transmission
-
-- handshake: client and server negotiate crypto algos, key exchanges, authentications
-
-- record: protocol ensures data is encrypted + decrypted correctly, maintaining integrity
-
-    - versioning: each version enhances security
-
-    - widely used in HTTPS (prevents eavesdropping, tampering, MITM)
-
-    - email encryption (SMTPS, POP3S, IMAPS)
-
-    - used in VPNs, VoIP, file transfers
-
-    challenges:
-
-    - misconfigured TLS (outdated protocols, weak ciphers)
-
-    - cert management: expired, revoked, untrusted certs can compromise security
-
-    - compatibility with older versions
-
-**Difference between IPS and IDS?**
-
-- **IDS**:
-
-    - detection focused: monitors network and system activities for malicious activities/policy violations; surveillance system
-
-    - passive: doesn't alter network traffic. observes + reports
-
-    - NIDS: network based, monitors traffic on entire network
-
-    - HIDS: host based, monitors internals of a computer rather than network packets
-
-    - alerts: notifies admins of suspicious activities but doesn't take action
-
-    - logs: logs info related to detections for forensics
-
-- **IPS**:
-
-    - prevention focused: takes active steps to prevent threats
-
-    - active: placed inline with traffic to control/modify traffic, blocks traffic from malicious IP address
-
-    - NIPS: protects network from threats by examining network traffic
-
-    - HIPS: protects hosts by examining syscalls and state of host
-
-    - automatic: takes action like blocking, rerouting, removing malicious packets
-
-    - dynamic: reconfigures security controls to prevent or mitigate threats
-
-- IDS can be deployed without risk of disruption, IPS requires careful configuration to avoid false positives and network interruptions
-
-- IDS serves as detection layer, IPS acts as prevention/response layer
-
-- advanced: anomaly detection, machine learning
-
-
-**What is a firewall? How does it work?**
-
-- traffic filtering: examines and filters traffic (incoming/outgoing) based on predefined rules
-
-- packet filtering: inspects packets at network layer (source/dest IP, port numbers, protocols)
-
-- stateful inspection: tracks state of active connections, makes decisions based on context (stateful firewall)
-
-- application layer: inspects traffic at application layer and makes more sophisticated decisions based on context
-
-- hardware: physical devices placed between network and gateway
-
-- software: installed on individual servers/devices
-
-- cloud: cloud service, protects cloud infrastructure
-
-- rules: based on security policy
-
-- network security
-
-- access control
-
-- monitoring + logging
-
-challenges:
-
-    - configuration
-
-    - performance impact
-
-    - evolving threats
-
-    - 0-day attacks
-
-
-## 3. OWASP Top 10, Pentesting, and/or Web Applications
-
-**Differentiate XSS from CSRF**
-
-- **XSS**:
-
-    - involves injecting malicious scripts into pages viewed by other users
-
-    - runs in the context of the target browser, allowing attacker to steal cookies, session tokens, etc.
-
-    - stored XSS: malicious script stored on server (db), executed when user accesses compromised page
-
-    - reflected XSS: script is not stored but reflected off a web server, through URL or form input
-
-    - DOM XSS: occurs within DOM, doesn't need to interact with server for execution
-
-    - can lead to information theft, session hijacking, manipulate or deface web content
-
-    - mitigation:
-
-        1. sanitization of user inputs
-
-        2. CSP headers to restrict sources of executable script
-
-        3. encode data output to treat it as data, not executable code
-
-- **CSRF**:
-
-    - tricks a browser into executing an unwanted action on a site where they're authenticated
-
-    - attacker might send link/form that causes authenticated user to submit a request to another site where they're logged in
-
-    - can result in unauthorized actions performed on behalf of user (breaches, compromise)
-
-    - mitigation:
-
-        1. anti-CSRF tokens in forms, validate requests
-
-        2. same-origin policy restrictions in browsers
-
-        3. strict session management like re-auth for critical actions
-
-- XSS directly affects UX, CSRF exploits authenticated session without knowledge
-
-- XSS exploits trust in a website, CSRF exploits trust a website has in a browser
-
-- XSS: script runs within context of browser
-
-- CSRF: attack executed at server level, manipulating server into performing actions
-
-- prevention:
-
-    1. XSS: treat user input as untrusted and handle it carefully
-
-    2. CSRF: ensure every request is genuinely intended by user, through unique tokens
-
-
-**What is a Server-Side Request Forgery attack?**
-
-- attacker induces server to make request to unintended location, often internal systems
-
-- typically achieved by manipulating URLs/HTTP requests
-
-- might target internal dbs, cloud services, APIs that are accessible from server's network
-
-- also used to interact with services running on localhost
-
-- exploitation occurs through vulnerable web apps that don't validate user supplied URLs or inputs in making backend requests
-
-- can lead to exposure of sensitive data
-
-- map internal network architecture, identify internal services, other exploitable vulns
-
-- DoS
-
-- RCE: when SSRF is combined with other vulns
-
-- mitigation:
-
-    1. input validation
-
-    2. whitelist allowed resources and deny others
-
-    3. limit server's access to internal resources (strict firewall rules, segmentation)
-
-    4. review + update configurations of apps and servers to avoid misconfigs
-
-    5. monitor + log outbound requests
-
-
-**What is Same Origin Policy and CORS (Cross-Origin Resource Sharing)?**
-
-- **SOP**:
-
-    - restricts web pages from making requests to different domains than the one that served the web page
-
-    - prevents malicious scripts on one page from obtaining access to sensitive data on another page
-
-    - origin defined by scheme (protocol), host (domain), and port of URL
-
-    - webpage can only request resources from the same origin, unless exceptions explicitly allowed
-
-    - without specific perms, scripts from one origin can't read data from or write data to another origin (preventing XSS)
-
-- **CORS**:
-
-    - allows restricted resources on webpage to be requested from another domain
-
-    - relaxes the SOP for specific scenarios (flexible web apps)
-
-    - server specifies (through HTTP headers) who can access resources and how (methods, headers, credentials, etc)
-
-    - preflight requests: check if server permits actual requests
-
-- **SOP vs CORS**:
-
-    - SOP is a fundamental security model (isolating different origins) and CORS is a controlled way to relax SOP
-
-    - SOP is browser controlled, no configuration needed
-
-    - CORS requires specific setup on the server
-
-    - SOP is ideal for protecting data and preventing XSS
-
-    - CORS is used when a webapp needs to make cross-origin requests (3rd party APIs)
-
-
-
-## 4. Databases
-
-**What are the 6 aggregate functions of SQL?**
-
-1. `count()`: number of rows matching a criterion
-
-    - eg: `SELECT COUNT(*) FROM Customers;` returns number of customers in table
-
-2. `sum()`: adds up values in column
-
-    - eg: `SELECT SUM(SaleAmount) FROM Sales;` returns total sales amount from table
-
-3. `avg()`: average value of specified column
-
-    - eg: `SELECT AVG(Price) FROM Products;` returns average price of products from table
-
-4. `max()`: highest value
-
-    - `SELECT MAX(Score) FROM TestResults;` returns highest score from table
-
-5. `min()`: lowest value
-
-    - `SELECT MIN(Score) FROM TestResults;` returns lowest score from table
-
-6. `group_concat()`:
-
-    - concatenates values from column into a single string, using a delimiter
-
-    - `SELECT GROUP_CONCAT(Name) FROM Employees;` returns single string of employee names concatenated together
-
-considerations:
-
-- except for `count(*)`, these functions ignore null values
-
-- resource-intensive on large datasets
-
-- often used with `GROUP BY` to aggregate data within specific categories
-
-
-## 5. Tools and Games
-
-**What is the difference between `nmap -ss` and `nmap -st`?**
-
-- **`nmap -ss`**:
-
-    - SYN scan aka stealth scan
-
-    - less intrusive, more discreet
-
-    - sends a SYN packet (part of TCP handshake process) to target port
-
-    - if target port is open, responds with SYN-ACK packet
-
-    - nmap sends RST (Reset) packet, closing connection before handshake is completed
-
-    - less likely to be logged by IDS (doesn't complete handshake)
-
-    - faster than `nmap -st`
-
-    - commonly used for quick, less detectable network recon
-
-    - requires root/admin privs (involves crafting raw packets)
-
-- **`nmap -st`**:
-
-    - TCP Connect Scan
-
-    - performs full handshake process
-
-    - nmap attempts to establish complete connection (SYN -> SYN-ACK -> ACK) with target port
-
-    - port is considered open if connection successfully established, then nmap closes connection
-
-    - doesn't require root/admin (uses system's TCP stack)
-
-    - logs on the target system + firewalls will show the connection and detect it
-
-    - used for more thorough and compliant scan (stealth not a priority)
-
-    - ideal in environments where user doesn't have privs
-
-**How would you filter "xyz" in Wireshark?**
-
-1. open wireshark + start capture (or open saved .pcap)
-
-2. apply display filter
-    
-    - write display filter in filter bar at the top
-
-    - filter for string "xyz" using `data contains "xyz"`
-
-    - filter will show all packets where data portion contains sequence "xyz"
-
-3. refining the filter
-
-    - if you know the specific protocol/context, you can refine the filter
-
-    - example: `http.request.uri contains "xyz"`
-
-    - this filters for HTTP requests with URIs containing "xyz"
-
-4. apply the filter
-
-    - press `Enter` or click arrow button next to filter bar
-
-    - wireshark updates packet list to show only those packets matching filter criteria
-
-5. analyze filtered packets
-
-    - once filtered, you can click on individual packets to view details and verify
-
-**What is the difference between tcp dump and FWmonitor?**
-
-- **tcpdump**:
-
-    - command-line packet analyzer
-
-    - users can capture/display TCP/IP and other packets being transmitted/received over a network
-
-    - captures packets at network interface level
-
-    - can filter traffic to show specific packets
-
-    - can be used on almost all *nix OS
-
-    - go-to tool for network debugging
-
-    - provides detailed information about network packets (source/dest IP address, packet size, timestamp, protocol)
-
-    - lacks UI
-
-    - significant system resources
-
-- **FWmonitor**:
-
-    - specific to check point firewalls
-
-    - used to inspec and debug traffic passing through check point firewall modules
-
-    - designed to capture and display packets specifically handled by check point firewall processes and components
-
-    - allows admins to see how packets are affected by rules
-
-    - check point firewall centric
-
-    - useful for firewall admins and less for general network troubleshooting
-
-
-## 6. Programming and Code
-
-**How can Github webhooks (automating workflows for repo events) be used in a malicious way?**
-
-1. unauthorized webhook creation
-
-    - attacker gains write access to repo (compromised creds or perm misconfigs) and creates webhook
-
-    - webhook points to malicious server
-
-    - when repo triggers webhook (eg: push event), it sends repo data to attacker's server
-
-2. interception + manipulation of webhook data
-
-    - webhooks not using HTTPS or lacking proper validation can be intercepted
-
-    - attacker could intercept webhook requests, read sensitive data, manipulate payload before it reaches intended destination
-
-3. DDoS
-
-    - attacker creates multiple webhooks in a repo or access various repos to trigger massive amount of traffic to target server
-
-    - webhooks can be config'd to all trigger simultaneously (eg: common event)
-
-4. code injection
-
-    - webhook set up to trigger CI/CD pipeline or execute script on server
-
-    - if webhook payload or receiving script is not securely coded, it could be exploited to execute malicious code on server running the CI/CD pipeline
-
-5. repo data leakage
-
-    - attacker modifies existing webhook to point to a controlled server
-
-    - sensitive repo data sent to attacker whenever webhook triggers
-
-6.  webhook spamming
-
-    - attacker creates webhooks that trigger on common repo events
-
-    - results similar to DDoS
-
-mitigations:
-
-    1. control + monitor who has the ability to create/modify webhooks in repos
-
-    2. use HTTPS endpoints for webhooks to encrypted transmitted data
-
-    3. implement signature verification on receiving end of webhook to validate payloads
-
-    4. review + audit webhooks configured in repos
-
-    5. least privilege principle to account/service that handles webhook actions
-
-    6. ensure scripts/process triggered by webhooks do not expose vulns
-
-
-**Slack? [Referring to Slack security]**
-
-1. phishing
-
-    - attackers impersonate legit users/orgs within slack
-
-    - send messages containing malicious links/requests for information
-
-2. malware
-
-    - can be distributed via files/links shared in channels or DMs
-
-    - users can infect their systems unintentionally, and further spread the malware
-
-3. data leakage
-
-    - compromised accounts can intentionally or accidentally leak data
-
-    - info can be used for espionage, blackmail, public exposure
-
-4. integration exploits
-
-    - integration with other services/tools can be exploited
-
-    - poorly secured integrations used to gain access to external systems/data
-
-5. credential theft
-
-    - through social engineering/phishing
-
-6. MITM
-
-    - if slack is intercepted over unsecured WiFi, it could be vulnerable to eavesdropping
-
-    - attackers can potentially intercept/read messages
-
-7. ransomware/extortion
-
-8. bot-based attacks
-
-mitigations:
-
-    1. user awareness/education
-
-    2. secure integrations
-
-    3. channel monitoring
-
-    4. strong authentication
-
-    5. use slack over secure, encrypted networks
-
-    6. regular audits
-
-    7. control file sharing
-
-
-## 7. Compliance
-
-**Can you explain SOC 2 (Service Organization Control 2)? What are the five trust criteria?**
-
-- specifically intended for service providers storing customer data in the cloud
-
-- ensures information security measures are in line with today's cloud env requirements
-
-- developed by AICPA (American Institute of CPAs)
-
-- SOC 2 reports based on AICPA's Trust Services Criteria
-
-    - Type I: evaluates suitability of design of controls at specific moment in time
-
-    - Type II: examines operational effectiveness of these controls over a period (typically 6 months)
-
-- trust criteria:
-
-    1. security
-
-        - protection of system resources against unauthorized access
-
-        - security controls prevent potential system abuse, theft, unauthorized removal of data, misuse of software, improper alteration, disclosure of information
-
-    2. availability
-
-        - accessibility of system, products, services as stipulated by contract or SLA (Service Level Agreement)
-
-        - does not focus on functionality/usability but addresses availability of system
-
-    3. processing integrity
-
-        - whether system achieves its purpose (i.e. delivers the right data at the right price at the right time)
-
-        - focuses on completeness, validity, accuracy, timeliness, authorization of system processing
-
-    4. confidentiality
-
-        - data designated as confidential and how it's protected
-
-        - applies to data intended to be restricted to a certain group of individuals/orgs (business plans, intellectual property, internal price lists, sensitive financial information)
-
-    5. privacy
-
-        - collection, use, retention, disclosure, disposal of personal information in conformity with an org's privacy notice and principles consistent with AICPA's GAPP (Generally Accepted Privacy Principles)
-
-        - system's collection of personal information, how it's used, who it's shared with, how it's disposed of/anonymized
-
-- customizable to business needs
-
-**What is the difference between Governance, Risk, and Compliance?**
-
-- **governance**
-
-    - set of processes, policies, laws, and institutions that define the structure by which companies are directed + managed
-
-    - balancing interests of a company's stakeholders
-
-    - elements:
-
-        - corporate strategy
-
-        - leadership + organization
-
-        - corporate policies + standards
-
-    - ensures org activities are aligned with business goals, conducted transparently + ethically, adhere to the law
-
-- **risk**
-
-    - identifying, assessing, controlling threats to an org's capital/earnings
-
-    - risks can stem from a variety of sources (financial uncertainties, legal liabilities, strategic management errors, accidents, natural disasters)
-
-    - elements:
-
-        - risk assessment
-
-        - risk mitigation
-
-    - ensures org understands/mitigates risks associated with its activities
-
-- **compliance**
-
-    - conforming to stated requirements
-
-    - adhering to laws, policies, regulations, contractual obligations
-
-    - elements:
-
-        - regulatory compliance
-
-        - policy compliance
-
-    - org operates in legal/ethical manner + meets its external statutory/regulatory requirements
-
-# Intermediate Level
-
-These questions require a deeper understanding and some practical experience:
-
-## 1. Encryption and Authentication
 
 **Explain how OAuth (used for token-based auth) works.**
 
@@ -1122,223 +373,6 @@ These questions require a deeper understanding and some practical experience:
     - built-in encryption options in dbs, file systems, cloud services
 
     - use as part of a broader security strategy (access controls, network security, security training)
-
-
-## 2. Network Level and Logging
-
-**How does a router differ from a switch?**
-
-- routers (using NAT, DHCP) operate at Network Layer (Layer 3) using IP, switches (LAN) operate at Data Link Layer (Layer 2) using MAC
-
-- routers used to connect different networks + direct data between them, switches used to connect devices within same network + manage internal data traffic
-
-- routers handle internal + external traffic (network-wide traffic management), switches primarily handle local traffic (forward data within internal network)
-
-**What is the difference between HTTPS and SSL?**
-
-- SSL/TLS is a protocol for encryption, HTTPS is an implementation of SSL/TLS applied to HTTP
-
-- SSL/TLS can be used beyond just securing HTTP (can secure FTP, SMTP), HTTPS is tied to HTTP
-
-- SSL evolved into TLS
-
-
-**How does threat modeling work?**
-
-- identify, prioritize, address potential security threats
-
-- simulate attack scenarios, assess vulns in connected systems/apps
-
-- reduce org's risk exposure by identifying vulns and potential attack vectors
-
-- threat, vuln, risk
-
-- process:
-
-    1. define scope
-
-    2. asset identification
-
-    3. identify threats
-
-    4. analyze vulns + prioritize risks
-
-    5. develop + implement countermeasures
-
-    6. monitor + evaluate
-
-- collab (security, engineering, IT, governance, business, end users)
-
-- frameworks
-
-    - MITRE ATT&CK (map identified threats to known adversary methods): knowledge base of TTPs
-
-    - DREAD (Damage, Reproducability, Exploitability, Affected Users, Discoverability): risk assessment model, quantitative approach to prioritizing threats
-
-    - STRIDE (Spoofing, Tampering, Repudiation, Information Disclosure, Denial of Service, Elevation of Privilege): categorizing threats in software systems
-
-    - PASTA: aligns threat modeling with business objectives, across various org contexts
-
-- benefits
-
-    - enhances awareness, identifies vulns
-
-    - prioritizes risk mitigation, optimizes security controls
-
-    - adapts to evolving threats, improves org resilience
-
-
-Explain the difference between IPSEC Phase 1 and Phase 2?
-
-**How does HTTPS work?**
-
-- client requests secure connection -> SSL/TLS handshake -> server auth -> key exchange -> secure symmetric connection established -> encrypted data transfer -> session closure
-
-## 3. OWASP Top 10, Pentesting, and/or Web Applications
-
-Explain man-in-the-middle attacks.
-
-Describe what are egghunters and their use in exploit development.
-
-**How is padlock icon in browser generated?**
-
-- if a server's SSL cert is validated (valid, not expired, issued by trusted CA, matches website's domain)
-
-## 4. Databases
-
-**How would you secure a Mongo database? Postgres?**
-
-- **mongoDB**:
-
-    1. enable authentication
-
-        - turn on mongo built-in authentication, use SCRAM-SHA-256 for strong password auth
-
-        - create specific user accounts with least privs necessary for role
-
-    2. configure RBAC
-
-        - define roles, assign them only necessary privs for accessing/modifying data
-
-    3. encrypt data
-
-        - encryption at rest to protect stored data using mongo's native encryption features
-
-        - use TLS/SSL for data in transit to secure client-server comms
-
-    4. network security
-
-        - bind mongoDB to local interface or use firewalls to restrict which clients can connect to db server
-
-        - use VPN/private network for added security
-
-    5. audit/monitor db activity
-
-        - enable mongo's auditing features to track/log access and changes to db
-
-        - regularly monitor logs for unusual/unauth'd activities
-
-    6. regular updates + patches
-
-    7. backup + disaster recovery
-
-    8. avoid exposing mongoDB to internet: always use app-level access or secure APIs
-
-- **postgresql**:
-
-    - pretty much the same as mongo except `pg_hba.conf` can be configured to control which hosts can connect and how, and parametrized queries should be used to prevent SQLi attacks
-
-    - keep dev, test, prod envs separate
-
-
-## 5. Tools and Games
-
-Given a sample packet capture - Identify the protocol, the traffic, and the likelihood of malicious intent.
-
-**How would you use CI/CD to improve security?**
-
-- integrating security
-
-    1. automated security scanning
-
-        - tools like SAST/DAST can identify vulns early in dev process
-
-        - use software composition analysis tools to check for vulns in 3rd party libraries or dependencies
-
-    2. code quality checks
-
-        - implement code quality gates that prevent merging code changes that do not meet predefined security standards
-
-        - use linters/code analyzers to enforce best practices + detect security anti-patterns
-
-    3. secrets management
-
-        - automate process of securing/managing secrets (API keys, passwords, certs)
-
-        - tools like HashiCorp Vault, AWS Secrets Manager, etc can be integrated into CI/CD pipeline
-
-    4. automated compliance checks
-
-        - incorporate tools to check for compliance with standards/regulations
-
-        - use IaC (infra as code) scanning tools to ensure that infrastructure deployments adhere to best practices
-
-    5. container scanning
-
-        - intergrate container scanning tools into CI pipeline to identify vulns within container images
-
-    6. dynamic env testing
-
-        - automatically deploy changes to dynamic testing env where additional security tests can be conducted, included pentesting + runtime analysis
-
-- continuous delivery/deployment
-
-    1. automated deployment
-
-        - reduce human errors
-
-        - use tools like jenkins, gitlab, github actions
-
-        - ensure deployment process includes steps to verify security of deployment (check for proper configs + runtime env security)
-
-    2. post-deployment monitoring
-
-        - integrate security monitoring tools into prod env to continuously monitor for suspicious activities or vulns
-
-        - implement logging/alerting mechanisms to detect + respond to incidents in real-time
-
-- security in infra management
-
-    1. IaC
-
-        - merge infra thru code to ensure consistent and repeatable setups
-
-        - perform regular audits on IaC to detect misconfigs
-
-    2. regular updates + patches
-
-
-## 6. Programming and Code
-
-How would you conduct a security code review?
-
-Given a CVE, walk us through it and how the solution works.
-
-
-## 7. Compliance
-
-How is ISO27001 different from SOC 2?
-
-What does Zero Trust mean?
-
-What is role-based access control (RBAC) and why is it covered by compliance frameworks?
-
-
-# Advanced Level
-
-These questions are highly technical and require extensive knowledge and experience:
-
-## 1. Encryption and Authentication
 
 **How do cookies work? How do sessions work?**
 
@@ -1633,13 +667,280 @@ These questions are highly technical and require extensive knowledge and experie
     - timestamps + nonces: use timestamps/nonces (number/bit string used only once in security protocol) to prevent replay attacks (old messages resent to fake current transaction)
 
 
-## 2. Network Level and Logging
+# 2. Network Level and Logging
+
+**What are common ports involving security, what are the risks and mitigations?**
+
+- **80 (HTTP)**: 
+
+    1. risk: unencrypted web traffic, intercepting/sniffing data
+
+    2. mitigation: use HTTPS and implement HSTS (http strict transport security) to enforce secure connections
+
+- **443 (HTTPS)**:
+
+    1. risk: vulnerable to misconfigured SSL/TLS, outdated encryption protocols, cipher suites
+
+    2. mitigation: keep SSL/TLS certs updated, use strong encryption (TLS1.2/1.3), disable older protocols (SSLv3)
+
+- **20, 21 (FTP)**:
+
+    1. risk: data transmitted in plaintext, vulnerable to interception + unauthorized data access
+
+    2. mitigation: use SFTP (ssh file transfer protocol) or FTPS (ftp secure) for encrypted transfers
+
+- **22 (SSH)**: 
+
+    1. risk: brute force target, attackers can gain shell access
+
+    2. mitigation: strong passwords, key-based authentication, 2FA, change default port
+
+- **23 (TELNET)**:
+
+    1. risk: similar to FTP
+
+    2. mitigation: replace with SSH
+
+- **25 (SMTP)**:
+
+    1. risk: can be exploited to send spam/phishing emails
+
+    2. mitigation: use SMTPS (port 465) for secure emails, implement SPF (sender policy framework), DKIM (domainkeys identified mail), DMARC (domain based message authentication reporting conformance)
+
+- **53 (DNS)**:
+
+    1. risk: DNS spoofing/poisoning can redirect traffic to malicious sites
+
+    2. mitigation: use DNSSEC for verifying authenticity of DNS data
+
+- **3389 (RDP)**:
+
+    1. risk: target for brute force/credential stuffing, can grant full control
+
+    2. mitigation: use VPNs, enable NLA (network level auth), limit RDP via firewalls
+
+    extra:
+
+    - change default ports to non standard ports
+
+    - configure firewalls to restrict access to necessary ports
+
+    - regular security audits + monitor network traffic
+
+    - software + firmware updates
+
+    - network segmentation
+
+
+**What is a subnet and how is it useful in security?**
+
+- segmentation: dividing a larger network into smaller subnets, each subnet operates as a distinct network within the larger infrastructure
+
+- IP addressing: range of IP addresses allocated within the network (subnet's network boundary)
+
+- **subnet mask**: used to divide the IP addresses into a network and host component; defines network range within larger network
+
+- scheme: contiguous IP addresses (class C: 192.168.1.0 - 192.168.1.255)
+
+- configured by routers and switches
+
+- VLANs often used with subnets to enhance network management + security
+
+- public vs. private: public subnets can interact with the internet, private subnets are for internal network resources
+
+- security:
+
+    1. containment of threats
+
+    2. reduced attack surface
+
+- access:
+
+    1. subnets can have specific access controls
+
+    2. enhanced monitoring
+
+- compliance:
+
+    1. subnets help in segregrating sensitive data
+
+    2. isolating critical servers/dbs -> exposure is limited
+
+- edge cases:
+
+    1. oversegmentation: network complexity -> difficult to manage
+
+    2. cross-subnet access: misconfigured access controls -> unauthorized access
+
+    3. VPN: understanding how VPNs interact with subnets
+
+**Explain the difference between TCP and UDP. Which is more secure and why?**
+
+- **TCP**:
+
+    - connection oriented: establishes connection before transmission (3-way handshake)
+
+    - reliable delivery: all packets must be delivered accurately and in the correct order (packet sequencing, acknowledgements, retransmission of lost packets)
+
+    - applications where reliability and order are crucial (HTTPS, FTP, SMTP)
+
+    - more secure than UDP (establishes connection and confirms packet delivery)
+
+    - subject to attacks like SYN flooding, SYNACK spoofing, session hijacking
+
+- **UDP**:
+
+    - connectionless: sends packets (datagrams) independently
+
+    - unreliable delivery: no acknowledgement, retransmission. no guarantee of delivery, order, integrity
+
+    - applications where speed > reliability (video streaming, online gaming, VoIP)
+
+    - less secure than TCP (susceptible to spoofing/reflection attacks eg: send UDP packets with a forged IP address, leading to a reflection attack)
+
+    - no built-in mechanism for integrity or authenticity
+
+**What is the TCP three-way handshake?**
+
+    1. SYN (synchronize):
+
+    - the client sends a TCP packet with the SYN flag set to the server.
+
+    - the packet indicates an initiation of a connection request and contains an ISN (initial sequence number) generated by the client.
+
+    - the client asks the server to acknowledge (ACK) this sequence number.
+    
+    2. SYN-ACK (synchronize-acknowledge)
+
+    - the server then responds with a TCP packet that has both SYN and ACK flags set.
+
+    - this acknowledges the client’s sequence number and also contains the server’s own ISN.
+    
+    3. ACK (acknowledge)
+
+    - the client then sends a final ACK packet to acknowledge the client’s ISN.
+
+    - this completes the handshake, and both parties now exchange data, in both directions.
+
+**What is the purpose of TLS?**
+
+- encryption: established with a combination of symmetric and asymmetric cryptography.
+
+- authentication: digital certificates used to ensure parties are authenticated
+
+- integrity: mechanisms in place to ensure data has not been corrupted/altered during transmission
+
+- handshake: client and server negotiate crypto algos, key exchanges, authentications
+
+- record: protocol ensures data is encrypted + decrypted correctly, maintaining integrity
+
+    - versioning: each version enhances security
+
+    - widely used in HTTPS (prevents eavesdropping, tampering, MITM)
+
+    - email encryption (SMTPS, POP3S, IMAPS)
+
+    - used in VPNs, VoIP, file transfers
+
+    challenges:
+
+    - misconfigured TLS (outdated protocols, weak ciphers)
+
+    - cert management: expired, revoked, untrusted certs can compromise security
+
+    - compatibility with older versions
+
+**Difference between IPS and IDS?**
+
+- **IDS**:
+
+    - detection focused: monitors network and system activities for malicious activities/policy violations; surveillance system
+
+    - passive: doesn't alter network traffic. observes + reports
+
+    - NIDS: network based, monitors traffic on entire network
+
+    - HIDS: host based, monitors internals of a computer rather than network packets
+
+    - alerts: notifies admins of suspicious activities but doesn't take action
+
+    - logs: logs info related to detections for forensics
+
+- **IPS**:
+
+    - prevention focused: takes active steps to prevent threats
+
+    - active: placed inline with traffic to control/modify traffic, blocks traffic from malicious IP address
+
+    - NIPS: protects network from threats by examining network traffic
+
+    - HIPS: protects hosts by examining syscalls and state of host
+
+    - automatic: takes action like blocking, rerouting, removing malicious packets
+
+    - dynamic: reconfigures security controls to prevent or mitigate threats
+
+- IDS can be deployed without risk of disruption, IPS requires careful configuration to avoid false positives and network interruptions
+
+- IDS serves as detection layer, IPS acts as prevention/response layer
+
+- advanced: anomaly detection, machine learning
+
+
+**What is a firewall? How does it work?**
+
+- traffic filtering: examines and filters traffic (incoming/outgoing) based on predefined rules
+
+- packet filtering: inspects packets at network layer (source/dest IP, port numbers, protocols)
+
+- stateful inspection: tracks state of active connections, makes decisions based on context (stateful firewall)
+
+- application layer: inspects traffic at application layer and makes more sophisticated decisions based on context
+
+- hardware: physical devices placed between network and gateway
+
+- software: installed on individual servers/devices
+
+- cloud: cloud service, protects cloud infrastructure
+
+- rules: based on security policy
+
+- network security
+
+- access control
+
+- monitoring + logging
+
+challenges:
+
+    - configuration
+
+    - performance impact
+
+    - evolving threats
+
+    - 0-day attacks
+
+**How does a router differ from a switch?**
+
+- routers (using NAT, DHCP) operate at Network Layer (Layer 3) using IP, switches (LAN) operate at Data Link Layer (Layer 2) using MAC
+
+- routers used to connect different networks + direct data between them, switches used to connect devices within same network + manage internal data traffic
+
+- routers handle internal + external traffic (network-wide traffic management), switches primarily handle local traffic (forward data within internal network)
+
+**What is the difference between HTTPS and SSL?**
+
+- SSL/TLS is a protocol for encryption, HTTPS is an implementation of SSL/TLS applied to HTTP
+
+- SSL/TLS can be used beyond just securing HTTP (can secure FTP, SMTP), HTTPS is tied to HTTP
+
+- SSL evolved into TLS
 
 Draw a network, then expect them to raise an issue and have to figure out where it happened.
 
 Describe the Risk Management Framework process and a project where you successfully implemented 
 compliance with RMF.
-
 
 **How does a packet travel between two hosts connected in the same network?**
 
@@ -1674,7 +975,6 @@ compliance with RMF.
     12. if using TCP, host B sends ACK back to host A (using the same process)
 
 - involves data link layer and network layer
-
 
 
 **What are the biggest AWS security vulnerabilities?**
@@ -1865,7 +1165,6 @@ compliance with RMF.
 
     - due to distributed nature, security/privacy/encryption (MFA) is super important
 
-
 **How do you harden a system? How to you elevate permissions?**
 
 - **system hardening**
@@ -1976,7 +1275,6 @@ compliance with RMF.
 
     - limited visibility (no info about switches, load balancers, other network devices)
 
-
 **What is SYN/ACK and how does it work?**
 
 - acknowledges the receipt of the SYN packet by including an acknowledgement number (client's ISN + 1)
@@ -2060,9 +1358,253 @@ You got the memory dump of a potentially compromised system, how are you going t
     - kernel checks whether calling process has sufficient privs to perform requested operation
 
 
-How would you go about reverse-engineering a custom protocol packet?
+**How would you go about reverse-engineering a custom protocol packet?**
 
-## 3. OWASP Top 10, Pentesting, and/or Web Applications
+1. capture network traffic
+
+- use packet sniffers (wireshark/tcpdump)
+
+- select the right network segment
+
+2. analyze packet structure
+
+- identify recurring, unique patterns (headers, footer, data delimiters)
+
+- determine packet boundaries
+
+3. dissect packet content
+
+- break down packets into smaller segments (identifiers, flags, lengths, checksums, payload)
+
+- payload analysis
+
+4. hypothesize protocol operations
+
+- look for C2 messages, data queries, acknowledgements, etc.
+
+- use contextual information
+
+5. test + validate theories
+
+- using scapy, modify packet contents and resend to observe effects
+
+- consistency checks
+
+6. look for standard protocols
+
+7. document protocol
+
+- create protocol spec
+
+- include examples + diagrams
+
+9. use automated tools
+
+- tools like NetworkMinder or custom scripts 
+
+Explain the difference between IPSEC Phase 1 and Phase 2?
+
+**How does HTTPS work?**
+
+- client requests secure connection -> SSL/TLS handshake -> server auth -> key exchange -> secure symmetric connection established -> encrypted data transfer -> session closure
+
+# 3. OWASP Top 10, Pentesting, and/or Web Applications
+
+Explain man-in-the-middle attacks.
+
+**Describe what are egghunters and their use in exploit development.**
+
+1. payload splitting:
+
+- payload split into 2 parts: egghunter and egg
+
+- egg is actual payload (shellcode), placed in memory space of process
+
+2. marking the egg
+
+- egg is marked with a unique sequence of bytes (signature) at the beginning so egghunter can identify it
+
+3. egghunter
+
+- egghunter placed in limited buffer space and executed
+
+- systematically searches thru process's memory space for unique signature marking start of the egg
+
+- once it finds the egg, it passes control to payload for execution
+
+- used to execute larger payloads when faced with space limitations in a buffer overflow vuln
+
+**How is padlock icon in browser generated?**
+
+- if a server's SSL cert is validated (valid, not expired, issued by trusted CA, matches website's domain)
+
+**How does threat modeling work?**
+
+- identify, prioritize, address potential security threats
+
+- simulate attack scenarios, assess vulns in connected systems/apps
+
+- reduce org's risk exposure by identifying vulns and potential attack vectors
+
+- threat, vuln, risk
+
+- process:
+
+    1. define scope
+
+    2. asset identification
+
+    3. identify threats
+
+    4. analyze vulns + prioritize risks
+
+    5. develop + implement countermeasures
+
+    6. monitor + evaluate
+
+- collab (security, engineering, IT, governance, business, end users)
+
+- frameworks
+
+    - MITRE ATT&CK (map identified threats to known adversary methods): knowledge base of TTPs
+
+    - DREAD (Damage, Reproducability, Exploitability, Affected Users, Discoverability): risk assessment model, quantitative approach to prioritizing threats
+
+    - STRIDE (Spoofing, Tampering, Repudiation, Information Disclosure, Denial of Service, Elevation of Privilege): categorizing threats in software systems
+
+    - PASTA: aligns threat modeling with business objectives, across various org contexts
+
+- benefits
+
+    - enhances awareness, identifies vulns
+
+    - prioritizes risk mitigation, optimizes security controls
+
+    - adapts to evolving threats, improves org resilience
+
+**Differentiate XSS from CSRF**
+
+- **XSS**:
+
+    - involves injecting malicious scripts into pages viewed by other users
+
+    - runs in the context of the target browser, allowing attacker to steal cookies, session tokens, etc.
+
+    - stored XSS: malicious script stored on server (db), executed when user accesses compromised page
+
+    - reflected XSS: script is not stored but reflected off a web server, through URL or form input
+
+    - DOM XSS: occurs within DOM, doesn't need to interact with server for execution
+
+    - can lead to information theft, session hijacking, manipulate or deface web content
+
+    - mitigation:
+
+        1. sanitization of user inputs
+
+        2. CSP headers to restrict sources of executable script
+
+        3. encode data output to treat it as data, not executable code
+
+- **CSRF**:
+
+    - tricks a browser into executing an unwanted action on a site where they're authenticated
+
+    - attacker might send link/form that causes authenticated user to submit a request to another site where they're logged in
+
+    - can result in unauthorized actions performed on behalf of user (breaches, compromise)
+
+    - mitigation:
+
+        1. anti-CSRF tokens in forms, validate requests
+
+        2. same-origin policy restrictions in browsers
+
+        3. strict session management like re-auth for critical actions
+
+- XSS directly affects UX, CSRF exploits authenticated session without knowledge
+
+- XSS exploits trust in a website, CSRF exploits trust a website has in a browser
+
+- XSS: script runs within context of browser
+
+- CSRF: attack executed at server level, manipulating server into performing actions
+
+- prevention:
+
+    1. XSS: treat user input as untrusted and handle it carefully
+
+    2. CSRF: ensure every request is genuinely intended by user, through unique tokens
+
+
+**What is a Server-Side Request Forgery attack?**
+
+- attacker induces server to make request to unintended location, often internal systems
+
+- typically achieved by manipulating URLs/HTTP requests
+
+- might target internal dbs, cloud services, APIs that are accessible from server's network
+
+- also used to interact with services running on localhost
+
+- exploitation occurs through vulnerable web apps that don't validate user supplied URLs or inputs in making backend requests
+
+- can lead to exposure of sensitive data
+
+- map internal network architecture, identify internal services, other exploitable vulns
+
+- DoS
+
+- RCE: when SSRF is combined with other vulns
+
+- mitigation:
+
+    1. input validation
+
+    2. whitelist allowed resources and deny others
+
+    3. limit server's access to internal resources (strict firewall rules, segmentation)
+
+    4. review + update configurations of apps and servers to avoid misconfigs
+
+    5. monitor + log outbound requests
+
+
+**What is Same Origin Policy and CORS (Cross-Origin Resource Sharing)?**
+
+- **SOP**:
+
+    - restricts web pages from making requests to different domains than the one that served the web page
+
+    - prevents malicious scripts on one page from obtaining access to sensitive data on another page
+
+    - origin defined by scheme (protocol), host (domain), and port of URL
+
+    - webpage can only request resources from the same origin, unless exceptions explicitly allowed
+
+    - without specific perms, scripts from one origin can't read data from or write data to another origin (preventing XSS)
+
+- **CORS**:
+
+    - allows restricted resources on webpage to be requested from another domain
+
+    - relaxes the SOP for specific scenarios (flexible web apps)
+
+    - server specifies (through HTTP headers) who can access resources and how (methods, headers, credentials, etc)
+
+    - preflight requests: check if server permits actual requests
+
+- **SOP vs CORS**:
+
+    - SOP is a fundamental security model (isolating different origins) and CORS is a controlled way to relax SOP
+
+    - SOP is browser controlled, no configuration needed
+
+    - CORS requires specific setup on the server
+
+    - SOP is ideal for protecting data and preventing XSS
+
+    - CORS is used when a webapp needs to make cross-origin requests (3rd party APIs)
 
 **Do you know what XXE is?**
 
@@ -2096,6 +1638,86 @@ How would you go about reverse-engineering a custom protocol packet?
 
 
 ## 4. Databases
+
+**What are the 6 aggregate functions of SQL?**
+
+1. `count()`: number of rows matching a criterion
+
+    - eg: `SELECT COUNT(*) FROM Customers;` returns number of customers in table
+
+2. `sum()`: adds up values in column
+
+    - eg: `SELECT SUM(SaleAmount) FROM Sales;` returns total sales amount from table
+
+3. `avg()`: average value of specified column
+
+    - eg: `SELECT AVG(Price) FROM Products;` returns average price of products from table
+
+4. `max()`: highest value
+
+    - `SELECT MAX(Score) FROM TestResults;` returns highest score from table
+
+5. `min()`: lowest value
+
+    - `SELECT MIN(Score) FROM TestResults;` returns lowest score from table
+
+6. `group_concat()`:
+
+    - concatenates values from column into a single string, using a delimiter
+
+    - `SELECT GROUP_CONCAT(Name) FROM Employees;` returns single string of employee names concatenated together
+
+considerations:
+
+- except for `count(*)`, these functions ignore null values
+
+- resource-intensive on large datasets
+
+- often used with `GROUP BY` to aggregate data within specific categories
+
+**How would you secure a Mongo database? Postgres?**
+
+- **mongoDB**:
+
+    1. enable authentication
+
+        - turn on mongo built-in authentication, use SCRAM-SHA-256 for strong password auth
+
+        - create specific user accounts with least privs necessary for role
+
+    2. configure RBAC
+
+        - define roles, assign them only necessary privs for accessing/modifying data
+
+    3. encrypt data
+
+        - encryption at rest to protect stored data using mongo's native encryption features
+
+        - use TLS/SSL for data in transit to secure client-server comms
+
+    4. network security
+
+        - bind mongoDB to local interface or use firewalls to restrict which clients can connect to db server
+
+        - use VPN/private network for added security
+
+    5. audit/monitor db activity
+
+        - enable mongo's auditing features to track/log access and changes to db
+
+        - regularly monitor logs for unusual/unauth'd activities
+
+    6. regular updates + patches
+
+    7. backup + disaster recovery
+
+    8. avoid exposing mongoDB to internet: always use app-level access or secure APIs
+
+- **postgresql**:
+
+    - pretty much the same as mongo except `pg_hba.conf` can be configured to control which hosts can connect and how, and parametrized queries should be used to prevent SQLi attacks
+
+    - keep dev, test, prod envs separate
 
 **which db would you recommend to a client for security reasons, and why?**
 
@@ -2238,6 +1860,176 @@ How would you go about reverse-engineering a custom protocol packet?
 
 
 ## 5. Tools and Games
+
+**What is the difference between `nmap -ss` and `nmap -st`?**
+
+- **`nmap -ss`**:
+
+    - SYN scan aka stealth scan
+
+    - less intrusive, more discreet
+
+    - sends a SYN packet (part of TCP handshake process) to target port
+
+    - if target port is open, responds with SYN-ACK packet
+
+    - nmap sends RST (Reset) packet, closing connection before handshake is completed
+
+    - less likely to be logged by IDS (doesn't complete handshake)
+
+    - faster than `nmap -st`
+
+    - commonly used for quick, less detectable network recon
+
+    - requires root/admin privs (involves crafting raw packets)
+
+- **`nmap -st`**:
+
+    - TCP Connect Scan
+
+    - performs full handshake process
+
+    - nmap attempts to establish complete connection (SYN -> SYN-ACK -> ACK) with target port
+
+    - port is considered open if connection successfully established, then nmap closes connection
+
+    - doesn't require root/admin (uses system's TCP stack)
+
+    - logs on the target system + firewalls will show the connection and detect it
+
+    - used for more thorough and compliant scan (stealth not a priority)
+
+    - ideal in environments where user doesn't have privs
+
+**How would you filter "xyz" in Wireshark?**
+
+1. open wireshark + start capture (or open saved .pcap)
+
+2. apply display filter
+    
+    - write display filter in filter bar at the top
+
+    - filter for string "xyz" using `data contains "xyz"`
+
+    - filter will show all packets where data portion contains sequence "xyz"
+
+3. refining the filter
+
+    - if you know the specific protocol/context, you can refine the filter
+
+    - example: `http.request.uri contains "xyz"`
+
+    - this filters for HTTP requests with URIs containing "xyz"
+
+4. apply the filter
+
+    - press `Enter` or click arrow button next to filter bar
+
+    - wireshark updates packet list to show only those packets matching filter criteria
+
+5. analyze filtered packets
+
+    - once filtered, you can click on individual packets to view details and verify
+
+**What is the difference between tcp dump and FWmonitor?**
+
+- **tcpdump**:
+
+    - command-line packet analyzer
+
+    - users can capture/display TCP/IP and other packets being transmitted/received over a network
+
+    - captures packets at network interface level
+
+    - can filter traffic to show specific packets
+
+    - can be used on almost all *nix OS
+
+    - go-to tool for network debugging
+
+    - provides detailed information about network packets (source/dest IP address, packet size, timestamp, protocol)
+
+    - lacks UI
+
+    - significant system resources
+
+- **FWmonitor**:
+
+    - specific to check point firewalls
+
+    - used to inspec and debug traffic passing through check point firewall modules
+
+    - designed to capture and display packets specifically handled by check point firewall processes and components
+
+    - allows admins to see how packets are affected by rules
+
+    - check point firewall centric
+
+    - useful for firewall admins and less for general network troubleshooting
+
+Given a sample packet capture - Identify the protocol, the traffic, and the likelihood of malicious intent.
+
+**How would you use CI/CD to improve security?**
+
+- integrating security
+
+    1. automated security scanning
+
+        - tools like SAST/DAST can identify vulns early in dev process
+
+        - use software composition analysis tools to check for vulns in 3rd party libraries or dependencies
+
+    2. code quality checks
+
+        - implement code quality gates that prevent merging code changes that do not meet predefined security standards
+
+        - use linters/code analyzers to enforce best practices + detect security anti-patterns
+
+    3. secrets management
+
+        - automate process of securing/managing secrets (API keys, passwords, certs)
+
+        - tools like HashiCorp Vault, AWS Secrets Manager, etc can be integrated into CI/CD pipeline
+
+    4. automated compliance checks
+
+        - incorporate tools to check for compliance with standards/regulations
+
+        - use IaC (infra as code) scanning tools to ensure that infrastructure deployments adhere to best practices
+
+    5. container scanning
+
+        - intergrate container scanning tools into CI pipeline to identify vulns within container images
+
+    6. dynamic env testing
+
+        - automatically deploy changes to dynamic testing env where additional security tests can be conducted, included pentesting + runtime analysis
+
+- continuous delivery/deployment
+
+    1. automated deployment
+
+        - reduce human errors
+
+        - use tools like jenkins, gitlab, github actions
+
+        - ensure deployment process includes steps to verify security of deployment (check for proper configs + runtime env security)
+
+    2. post-deployment monitoring
+
+        - integrate security monitoring tools into prod env to continuously monitor for suspicious activities or vulns
+
+        - implement logging/alerting mechanisms to detect + respond to incidents in real-time
+
+- security in infra management
+
+    1. IaC
+
+        - merge infra thru code to ensure consistent and repeatable setups
+
+        - perform regular audits on IaC to detect misconfigs
+
+    2. regular updates + patches
 
 **If left alone in office with access to a computer, how would you exploit it?**
 
@@ -2445,7 +2237,123 @@ How would you go about reverse-engineering a custom protocol packet?
 
 - industry collaboration
 
+
 ## 6. Programming and Code
+
+**How can Github webhooks (automating workflows for repo events) be used in a malicious way?**
+
+1. unauthorized webhook creation
+
+    - attacker gains write access to repo (compromised creds or perm misconfigs) and creates webhook
+
+    - webhook points to malicious server
+
+    - when repo triggers webhook (eg: push event), it sends repo data to attacker's server
+
+2. interception + manipulation of webhook data
+
+    - webhooks not using HTTPS or lacking proper validation can be intercepted
+
+    - attacker could intercept webhook requests, read sensitive data, manipulate payload before it reaches intended destination
+
+3. DDoS
+
+    - attacker creates multiple webhooks in a repo or access various repos to trigger massive amount of traffic to target server
+
+    - webhooks can be config'd to all trigger simultaneously (eg: common event)
+
+4. code injection
+
+    - webhook set up to trigger CI/CD pipeline or execute script on server
+
+    - if webhook payload or receiving script is not securely coded, it could be exploited to execute malicious code on server running the CI/CD pipeline
+
+5. repo data leakage
+
+    - attacker modifies existing webhook to point to a controlled server
+
+    - sensitive repo data sent to attacker whenever webhook triggers
+
+6.  webhook spamming
+
+    - attacker creates webhooks that trigger on common repo events
+
+    - results similar to DDoS
+
+mitigations:
+
+    1. control + monitor who has the ability to create/modify webhooks in repos
+
+    2. use HTTPS endpoints for webhooks to encrypted transmitted data
+
+    3. implement signature verification on receiving end of webhook to validate payloads
+
+    4. review + audit webhooks configured in repos
+
+    5. least privilege principle to account/service that handles webhook actions
+
+    6. ensure scripts/process triggered by webhooks do not expose vulns
+
+
+**Slack? [Referring to Slack security]**
+
+1. phishing
+
+    - attackers impersonate legit users/orgs within slack
+
+    - send messages containing malicious links/requests for information
+
+2. malware
+
+    - can be distributed via files/links shared in channels or DMs
+
+    - users can infect their systems unintentionally, and further spread the malware
+
+3. data leakage
+
+    - compromised accounts can intentionally or accidentally leak data
+
+    - info can be used for espionage, blackmail, public exposure
+
+4. integration exploits
+
+    - integration with other services/tools can be exploited
+
+    - poorly secured integrations used to gain access to external systems/data
+
+5. credential theft
+
+    - through social engineering/phishing
+
+6. MITM
+
+    - if slack is intercepted over unsecured WiFi, it could be vulnerable to eavesdropping
+
+    - attackers can potentially intercept/read messages
+
+7. ransomware/extortion
+
+8. bot-based attacks
+
+mitigations:
+
+    1. user awareness/education
+
+    2. secure integrations
+
+    3. channel monitoring
+
+    4. strong authentication
+
+    5. use slack over secure, encrypted networks
+
+    6. regular audits
+
+    7. control file sharing
+
+How would you conduct a security code review?
+
+Given a CVE, walk us through it and how the solution works.
 
 **Code review a project and look for the vulnerability.**
 
@@ -2583,6 +2491,10 @@ considerations:
 
 - look at some tools on github or my tools
 
+- https://github.com/bilals12/dbMonitor
+
+- https://github.com/bilals12/cloudsync
+
 **How would you analyze a suspicious email link?**
 
 - visual inspection
@@ -2607,6 +2519,106 @@ considerations:
 
 
 ## 7. Compliance
+
+**Can you explain SOC 2 (Service Organization Control 2)? What are the five trust criteria?**
+
+- specifically intended for service providers storing customer data in the cloud
+
+- ensures information security measures are in line with today's cloud env requirements
+
+- developed by AICPA (American Institute of CPAs)
+
+- SOC 2 reports based on AICPA's Trust Services Criteria
+
+    - Type I: evaluates suitability of design of controls at specific moment in time
+
+    - Type II: examines operational effectiveness of these controls over a period (typically 6 months)
+
+- trust criteria:
+
+    1. security
+
+        - protection of system resources against unauthorized access
+
+        - security controls prevent potential system abuse, theft, unauthorized removal of data, misuse of software, improper alteration, disclosure of information
+
+    2. availability
+
+        - accessibility of system, products, services as stipulated by contract or SLA (Service Level Agreement)
+
+        - does not focus on functionality/usability but addresses availability of system
+
+    3. processing integrity
+
+        - whether system achieves its purpose (i.e. delivers the right data at the right price at the right time)
+
+        - focuses on completeness, validity, accuracy, timeliness, authorization of system processing
+
+    4. confidentiality
+
+        - data designated as confidential and how it's protected
+
+        - applies to data intended to be restricted to a certain group of individuals/orgs (business plans, intellectual property, internal price lists, sensitive financial information)
+
+    5. privacy
+
+        - collection, use, retention, disclosure, disposal of personal information in conformity with an org's privacy notice and principles consistent with AICPA's GAPP (Generally Accepted Privacy Principles)
+
+        - system's collection of personal information, how it's used, who it's shared with, how it's disposed of/anonymized
+
+- customizable to business needs
+
+**What is the difference between Governance, Risk, and Compliance?**
+
+- **governance**
+
+    - set of processes, policies, laws, and institutions that define the structure by which companies are directed + managed
+
+    - balancing interests of a company's stakeholders
+
+    - elements:
+
+        - corporate strategy
+
+        - leadership + organization
+
+        - corporate policies + standards
+
+    - ensures org activities are aligned with business goals, conducted transparently + ethically, adhere to the law
+
+- **risk**
+
+    - identifying, assessing, controlling threats to an org's capital/earnings
+
+    - risks can stem from a variety of sources (financial uncertainties, legal liabilities, strategic management errors, accidents, natural disasters)
+
+    - elements:
+
+        - risk assessment
+
+        - risk mitigation
+
+    - ensures org understands/mitigates risks associated with its activities
+
+- **compliance**
+
+    - conforming to stated requirements
+
+    - adhering to laws, policies, regulations, contractual obligations
+
+    - elements:
+
+        - regulatory compliance
+
+        - policy compliance
+
+    - org operates in legal/ethical manner + meets its external statutory/regulatory requirements
+
+How is ISO27001 different from SOC 2?
+
+What does Zero Trust mean?
+
+What is role-based access control (RBAC) and why is it covered by compliance frameworks?
 
 **What is the NIST framework and why is it influential?**
 
