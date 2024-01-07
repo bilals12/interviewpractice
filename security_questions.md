@@ -1637,7 +1637,7 @@ Explain man-in-the-middle attacks.
     - testing in the SDLC
 
 
-## 4. Databases
+# 4. Databases
 
 **What are the 6 aggregate functions of SQL?**
 
@@ -1859,7 +1859,7 @@ considerations:
         - adaptive security posture
 
 
-## 5. Tools and Games
+# 5. Tools and Games
 
 **What is the difference between `nmap -ss` and `nmap -st`?**
 
@@ -2238,7 +2238,7 @@ Given a sample packet capture - Identify the protocol, the traffic, and the like
 - industry collaboration
 
 
-## 6. Programming and Code
+# 6. Programming and Code
 
 **How can Github webhooks (automating workflows for repo events) be used in a malicious way?**
 
@@ -2518,7 +2518,7 @@ considerations:
 - report
 
 
-## 7. Compliance
+# 7. Compliance
 
 **Can you explain SOC 2 (Service Organization Control 2)? What are the five trust criteria?**
 
