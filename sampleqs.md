@@ -4,41 +4,127 @@
 
 1. what command would you use to view the contents of a directory?
 
+- use the `ls` command. 
+
 2. how do you check the permissions of a file?
+
+- `ls -l <filename>`
 
 3. how do you create a new user?
 
+- `useradd <username>`
+
 4. what is the purpose of the `/etc/passwd` (or `/etc/shadow`) file?
+
+- `/etc/passwd` stores user account info (username, UID, GID, home directory, shell)
+
+- `/etc/shadow` contains hashed password data (available to privileged users)
 
 5. how can you redirect output from a command to a file?
 
+- `> filename`, like `ls > file.txt` will direct the output of `ls` into `file.txt`.
+
 6. what does the `chmod` command do?
+
+- specifies who can read, write, or execute the file/directory.
 
 ## medium
 
 1. how would you display all running processes in linux?
 
+- `ps aux`
+
 2. how would you recursively search for a specific string within files in a directory? describe how to use `grep` to search for patterns.
+
+- `grep -r "<string pattern>" /path/to/dir`
+
+- search thru all files in directory and its subdirectories + displays files where pattern is found
 
 3. how can you find and terminate a process?
 
+- `ps` or `pgrep`, like `pgrep firefox`. this finds the PID of firefox
+
+- `kill <PID>` to kill process, or `kill -9 <PID>` to force-kill
+
 4. what is a `cron` job and how can you schedule one?
 
+- scheduled task that runs at specified intervals
+
+- edit crontab file using `crontab -e`, then add line specifying wheb task should run and command to execute, using the format "min, hr, day of month, month, day of week, command". 
+
+- `0 5 * * * /script.sh` schedules script to run daily @ 5am
+
 5. explain `iptables` (or `ipset`).
+
+- `iptables` used to configure linux kernel's netfilter firewall. it can set up, maintain, and inspect tables of IP packet filter rules in the kernel
+
+- you can define rules for how to handle incoming/outgoing traffic based on criteria like source/dest IP address, port, protocol
+
+- `ipset` works with `iptables` to manage/match in large volumes
 
 ## hard
 
 1. how can you set up SSH key-based authentication?
 
+- generate SSH key pair on client using `ssh-keygen`
+
+- transfer public key to server using `ssh-copy-id user@server`
+
+- ensure server's configuration permits key-based authentication (`/etc/ssh/sshd_config`, look for `PubkeyAuthentication` option and make sure it's set to `yes`. also confirm `AuthorizedKeysFile` line points to correct location of file, usually at `.ssh/authorized_keys`).
+
+- log in using `ssh user@server`
+
 2. describe the process to change kernel parameters in linux.
+
+- use `sysctl` for runtime config or modify `/etc/sysctl.conf` for persistent changes
+
+- temporary change: `sudo sysctl -w parameter=value`
+
+- persistent change: add `parameter=value` to `/etc/sysctl.conf`, apply changes with `sudo sysctl -p` (requires root)
 
 3. how can you recover a system from a lost root password?
 
+- restart system and access GRUB (bootloader menu)
+
+- edit boot params for kernel, adding `init=/bin/bash` (or `rw init=/sysroot/bin/sh` for SELinux). this boots to single-user mode (or root shell)
+
+- remount root filesystem as r/w using `mount -o remount,rw /`
+
+- use `passwd` to change root password, then reboot
+
 4. how can you configure a linux server as a router?
+
+- enable IP forwarding by setting `net.ipv4.ip_forward=1` in `/etc/sysctl.conf` and apply using `sysctl -p`
+
+- configure `iptables` to manage NAT rules, allowing server to forward between interfaces
+
+- this means defining `iptables` rules to mask outbound traffic, making devices behind router appear as if they're using one outgoing IP address.
 
 5. explain the differences between hard and soft links. how would you create them?
 
+- hard links: additional directory entries for a file, sharing same inode number (point to same file content on disk). cannot reference directories.
+
+- soft links (aka symlinks): pointers to file names, acting as shortcuts and can span across file systems. can reference directories.
+
+- create hard link: `ln file1 link1`
+
+- create soft link: `ls -s target link`
+
 6. how would you optimize a linux server for performance?
+
+- adjust `/etc/sysctl.conf` for network/file system performance
+
+- lower swappiness value to reduce disk swapping
+
+- use tools like `iostat` to monitor disk usage
+
+- disable unnecessary services (free up storage)
+
+- optimize TCP/IP settings
+
+- monitor with tools like `top`, `htop`, `vmstat`
+
+- keep updated
 
 # cloud app management
 
