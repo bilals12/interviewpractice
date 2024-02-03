@@ -402,7 +402,17 @@
 
 4. what tools do you use for infrastructure as code?
 
+- terraform: define cloud resources in config files that can be versioned/reused
+
+- ansible: config management, automates provisioning/deployment of apps and systems
+
+- AWS CloudFormation/Azure Resource Manager: model and set up resources using templates specific to their cloud platforms
+
+- Puppet/Chef: automate deployment/management of infrastructure code across various envs
+
 5. how can you use APIs for automation purposes?
+
+- scripting API calls, streamline workflows, reduce errors, increase efficiency in CI/CD
 
 ## hard
 
@@ -412,9 +422,33 @@
 
 3. how do you manage error handling in automated scripts?
 
+- try-catch blocks
+
+- log errors for debugging/audit
+
+- conditional statements to check for specific error conditions
+
+- exit codes (success/failure of execution)
+
+- powershell: `Try`, `Catch`, `Finally`
+
+- bash: `set -e` (exits on error)
+
 4. how can you automate network config changes?
 
+- Ansible, Terraform, Puppet: manage/provision network devices programmatically
+
+- define network configs in code, version control the config files, use the tools to apply configs consistently
+
 5. how would you automate security patch deployment across multiple servers?
+
+- same tools as above
+
+- first test patches in staging, then define patch deployment in code
+
+- schedule patch deployment during low-traffic periods
+
+- implement rollback in case of error
 
 # systems design/administration
 
@@ -424,11 +458,35 @@
 
 2. what is the role of a DHCP server?
 
+- automatically assigns IP addresses (and other params) to devices on network
+
+- simplifies network admin by eliminating need for manual IP address configs
+
+- supports automatic reassignment of IP addresses to device
+
+- manages IP address allocation to prevent conflicts
+
 3. explain the purpose of DNS in system administration.
+
+- translates domain names to IP addresses
+
+- also manage mail servers for a domain
+
+- manages internal servers
 
 4. what does a load balancer do?
 
+- distributes incoming network traffic across multiple servers to ensure no single server becomes overwhelmed
+
+- optimizes resource use, maximizes throughput, reduces response time, ensures fault tolerance, reroutes traffic in case of server failure
+
 5. how do you monitor system performance?
+
+- system resources (CPU, memory, I/O): `top`, `htop`, `vmstat`, `iostat`
+
+- performance data: `nmon`, `sar`
+
+- GUI: Grafana, Nagios, Prometheus
 
 ## medium
 
