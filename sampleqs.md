@@ -276,35 +276,107 @@
 
 1. what's the difference between a vulnerability scan and a penetration test?
 
+- vulnerability scan: identifies known vulns, provides reports, automated and broad
+
+- penetration test: simulation of cyber attack, identifies and exploits vulns, manual/targeted
+
 2. what's the difference between symmetric and asymmetric encryption?
+
+- symmetric: same key for encryption/decryption, fast, efficient for large volumes
+
+- asymmetric: secure communication (public + private keys), computationally complex
 
 3. what's a security group in a cloud env?
 
+- virtual firewall that controls inbound/outbound traffic for cloud resources (like VMs)
+
+- defines set of rules that specify allowed and denied traffic
+
 4. how do you ensure data is securely deleted?
 
+- cryptographic wiping: encrypt data before deletion
+
+- physical destruction of storage
+
+- tools that overwrite data multiple times with patterns/random data
+
 5. what are the basic principles of a secure password policy?
+
+- minimum length, mix of upper, lowercase and alphanumeric/special chars, regular changes, no recycling, MFA
 
 ## medium
 
 1. how do you stay updated with the latest vulnerabilities and patches?
 
+- automated vendor advisory program (SLACKER)
+
 2. explain XSS and how to prevent it.
+
+- injection of malicious scripts into pages viewed by users
+
+- validate/sanitize user inputs (escape special characters), CSP headers (restrict sources of executable scripts)
+
+- use frameworks that automatically XSS by design
 
 3. describe SQLi and how to mitigate it.
 
+- interfere with queries an app makes to the db to get access to the db
+
+- use prepared statements (parametrized queries: ensure input is treated as data, not code), object-relational mapping libraries (abstract db interactions), validate/sanitize inputs, update/patch
+
+- limit permissions (necessary access rights)
+
 4. how would you conduct a vulnerability assessment?
 
+- define scope: which systems and networks?
+
+- automated scanning tools
+
+- identify + prioritize vulns based on severity/impact
+
+- remediate by applying patches, configuring settings, security controls
+
+- document
+
 5. what is the significance of using HTTPS over HTTP?
+
+- HTTPS uses TLS/SSL for secure communication
 
 ## hard
 
 1. discuss the process of handling a data breach.
 
+- identify and contain breach
+
+- identify compromised data/individuals
+
+- notify stakeholders/regulatory bodies (as required by law)
+
+- investigate breach's cause
+
+- secure (patching)
+
 2. how do you perform a threat model for a new software application?
+
+- identify all components, data flows, entry points
+
+- define potential threats using frameworks (STRIDE, MITRE)
+
+- assess risks based on likelihood/impact
+
+- devise mitigation strategies for highest priority risks
+
+- document
 
 3. descibe how to secure a database from injection attacks.
 
 4. explain how to implement E2E encryption in a messaging app.
+
+- use asymmetric encryption (each user has public/private key pair)
+
+- message encrypted with recipient's public key and can only be decrypted by private key
+
+- use signal
 
 # scripting/automation
 
@@ -390,11 +462,47 @@
 
 2. what's the difference between virtualization and containerization?
 
+- virtualization: create virtual instances of physical hardware to run multiple operating systems
+
+- containerization: app code, configs, dependencies all encapsulated into a single object that runs consistently across any environment
+
+- VMs are fully isolated with their own OS
+
+- containers share host's kernel but isolate app process
+
+- containers are lighter and more efficient than VMs (quicker start times, less overhead)
+
 3. what are the benefits of using VMs?
+
+- strong isolation (different OSs can run on same hardware)
+
+- enhanced security
+
+- easy backup, replication, migration
+
+- flexibility
+
+- distributes hardware's compute among several environments
 
 4. how does hypervisor software work?
 
+- abstracts hardware (CPU, memory, storage) and distributes across VMs
+
+- operates at a layer above physical hardware and below VMs (enables multiple OS to share a single hardware host)
+
+- 2 types: bare metal (runs directly on host hardware) and hosted (runs on conventional OS as an app)
+
 5. what are containers? how are they used?
+
+- lightweight executable units (package of app code, libraries, dependencies in single object)
+
+- share host's kernel but run in isolated user spaces
+
+- ensure apps run quickly and reliably across different envs
+
+- more efficient use of resources
+
+- facilitate CI/CD by allowing devs to create/deploy/scale apps more easily and consistently
 
 ## medium
 
