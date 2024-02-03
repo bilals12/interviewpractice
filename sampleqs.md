@@ -132,35 +132,143 @@
 
 1. what are the key benefits of cloud computing for app management?
 
+- scalability: easy adjustment of resources to meet demand
+
+- cost efficiency: reducing need for upfront infrastructure investment
+
+- high availability/disaster recovery
+
+- flexibility/agility: quick deployment and updates
+
+- enhanced security
+
+- access to advanced technology (AI/ML)
+
 2. name some advantages of using cloud services over traditional on-prem data centers.
+
+- same as above
 
 3. how do you scale an application in the cloud?
 
+- automatically adjusted by cloud based on demand
+
+- vertically: add more power to existing instances (CPU/RAM)
+
+- horizontally: increase number of instances
+
+- load balancers distribute traffic across instances
+
 4. what is a CDN? why is it used?
 
+- servers that deliver content to users based on geolocation, origin, content delivery server
+
+- reduces latency, speeds up content load times, handles large volumes of traffic efficiently
+
+- also used for protection against large-scale DDoS 
+
 5. compare IaaS, PaaS, SaaS
+
+- IaaS: virtualized computing resources (VMs, storage)
+
+- PaaS: framework for devs to build and create custom apps (manages infrastructure while devs can focus on software)
+
+- SaaS: software on subscription basis
 
 ## medium
 
 1. how do you implement disaster recovery in cloud environments?
 
+- identify critical workloads and data that needs protection
+
+- replicate assets across multiple regions/availability zones
+
+- cloud-based backup solutions for data redundancy
+
+- failover mechanisms to switch operations in case of outage
+
+- test plan to make sure it meets RTO (recovery time objectives) and RPO (recovery point objectives)
+
 2. describe a strategy for multi-cloud management.
+
+- centralize visibility and control
+
+- tools that support multi-cloud envs, standardize ops and governance across clouds, consistent security/compliance, optimizing costs
 
 3. how would you secure data in the cloud?
 
+- implement encryption (for data at rest and in transit)
+
+- strong access controls + identity management
+
+- update + patch services and apps
+
+- monitor + log unauthorized access or anomalies
+
+- secure configs (compliance)
+
+- cloud-native security features
+
+- review + audit
+
 4. explain the process of migrating an on-prem app to the cloud.
+
+- choose right cloud provider/service model
+
+- consider data transfer and security needs
+
+- execute migration in phases
+
+- optimize app for cloud env
+
+- minimize downtime
 
 ## hard
 
 1. how would you architect a highly available and scalable app deployment in AWS or Azure?
 
+- use EC2 (AWS) or Azure VMs for compute
+
+- use S3 (AWS) or Blob Storage (Azure) for data
+
+- use Auto Scaling (AWS) or VM Scale Sets to adjust resources
+
+- implement load balancers for traffic distribution and Availability Zones for fault tolerance
+
+- use RDS (AWS) or Azure SQL for managed database services
+
+- integrate CDN for global content delivery
+
+- employ monitoring tools for performance insights, automate deployments (using CI/CD pipelines)
+
 2. discuss the challenges of managing stateful applications in the cloud.
 
+- ensuring data persistence across sessions/deployments
+
+- scaling stateful components without data loss/inconsistency
+
+- handling session state across multiple instances
+
+- migrating stateful apps without downtime
+
+- solutions: persistent storage, distributed data stores, managing deployment strategies
+
 3. how do you ensure compliance across different cloud environments?
+
+- unified compliance framework
+
+- utilize cloud management and security tools
+
+- understand compliance offerings
 
 4. describe a cloud architecture you designed for high availability.
 
 5. what are container orchestration tools, and how do they assist in cloud app management?
+
+- manage deployment, scaling, operation of containerized apps across clusters of hosts
+
+- automate container provisioning, networking, load balancing, security
+
+- examples: Kubernetes, Apache Mesos, Docker Swarm
 
 # data security/vulnerability testing
 
