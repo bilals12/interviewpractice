@@ -670,3 +670,286 @@ func greetHandler(w http.ResponseWriter, r *http.Request) {
 2. use of HTML templates
 
 3. set up HTTPS on server.
+
+# challenge 7
+
+```js
+const express = require('express');
+const bodyParser = require('body-parser');
+const nodemailer = require('nodemailer');
+
+const app = express();
+app.use(bodyParser.json());
+
+// Dummy email transporter (configure properly for a real app)
+const transporter = nodemailer.createTransport({
+    service: 'example',
+    auth: {
+        user: 'user@example.com',
+        pass: 'password'
+    }
+});
+
+app.get('/', (req, res) => {
+    res.send('Welcome to our application!');
+});
+
+app.get('/profile', (req, res) => {
+    // Dummy profile information
+    res.json({ username: 'JohnDoe', email: 'john@example.com' });
+});
+
+app.post('/register', (req, res) => {
+    // User registration logic (omitted for brevity)
+    res.send('User registration successful!');
+});
+
+app.post('/reset-password', (req, res) => {
+    const email = req.body.email;
+    const host = req.headers.host;
+
+    const resetLink = `http://${host}/reset-password?token=generatedToken123`;
+    transporter.sendMail({
+        from: 'support@example.com',
+        to: email,
+        subject: 'Password Reset',
+        text: `Click here to reset your password: ${resetLink}`
+    });
+
+    res.send('Password reset link has been sent to your email.');
+});
+
+app.listen(3000, () => {
+    console.log('Server is running on port 3000');
+});
+```
+
+## vulnerability found
+
+1. hardcoded creds.
+
+2. lack of input validation: `/reset-password` endpoint does not validate email input.
+
+3. insecure transport layer: using `http` for reset link.
+
+4. token predictability: token in reset link is hardcoded + predictable.
+
+5. lack of rate limiting: app does not implement rate limiting on sensitive endpoints.
+
+6. logging sensitive information.
+
+## fixed code
+
+```js
+require('dotenv).config();
+const express = require('express');
+const bodyParser = require('body-parser');
+const nodemailer = require('nodemailer');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+const crypto = require('crypto'); // will be used for secure random token generation
+
+const app = express();
+app.use(bodyParser.json());
+app.use(helmet());
+
+const resetPasswordLimiter = rateLimit({
+    windowMs: 15*60*1000, // 15 mins
+    max: 5 // each IP limited to 5 requests per windowMs
+});
+
+// use env variables for sensitive data
+const transporter = nodemailer.createTransport({
+    service: 'example',
+    auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+    }
+});
+
+app.use('/reset-password', resetPasswordLimiter);
+
+app.post('/reset-password', (req, res) => {
+    const email = req.body.email;
+    // email validation
+    function validateEmail(email) {
+        const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+        return re.test(String(email).toLowerCase());
+    };
+    const host = req.headers.host;
+
+    // use HTTPS + generate secure token
+    const resetLink = `https://${host}/reset-password?token=${secureRandomToken()}`;
+    transporter.sendMail({
+        from: 'support@example.com',
+        to: email,
+        subject: 'Password Reset',
+        text: 'Click here to reset your password: ${resetLink}'
+    });
+    res.send('Password reset link has been sent to your email.');
+});
+
+function secureRandomToken() {
+    return crypto.randomBytes(48).toString('hex');
+}
+
+app.listen(3000, () => {
+    console.log('Server is running on port 3000');
+});
+```
+
+## changes made
+
+1. dotenv for env variable management
+
+2. helmet for setting various HTTP headers for security
+
+3. express-rate-limit for basic rate limiting
+
+# challenge 8
+
+```nginx
+server {
+    listen 80;
+    server_name another-awesome-challenge.com;
+
+    location /backend { 
+        proxy_pass http://backend/;
+    }
+    
+    location /html {
+        alias /usr/share/nginx/html/;
+    }
+}
+```
+
+## fixed code
+
+```nginx
+server {
+    listen 80;
+    server_name another-awesome-challenge.com;
+    return 301 https://$server_name$request_uri; # Redirect HTTP to HTTPS
+}
+
+server {
+    listen 443 ssl;
+    server_name another-awesome-challenge.com;
+
+    # SSL configuration here (certificate and key paths)
+
+    add_header X-Frame-Options "SAMEORIGIN";
+    add_header X-Content-Type-Options "nosniff";
+    add_header X-XSS-Protection "1; mode=block";
+    add_header Content-Security-Policy "default-src 'self'";
+
+    location /backend { 
+        proxy_pass http://backend/;
+        # Consider IP whitelisting or basic auth for additional security
+    }
+    
+    location /html {
+        alias /usr/share/nginx/html/;
+        # Ensure only static files can be served from this location
+    }
+}
+```
+
+challenge 9
+
+```python
+from flask import Flask, render_template, request, redirect, url_for
+
+app = Flask(__name__)
+
+# Assume there's a UserProfileService with methods to fetch and update user profiles
+class UserProfileService:
+    def get_user_profile(self, username):
+        # Implementation to fetch user profile from the database
+        pass
+
+    def update_user_profile(self, user_profile):
+        # Implementation to update user profile in the database
+        pass
+
+user_profile_service = UserProfileService()
+
+@app.route('/edit-profile', methods=['POST'])
+def edit_profile():
+    username = request.form.get('username')
+    user_profile = user_profile_service.get_user_profile(username)
+
+    if user_profile.get_username() == username:
+        user_profile_service.update_user_profile(user_profile)
+        
+        return redirect(url_for('dashboard'))
+
+@app.route('/dashboard')
+def dashboard():
+    return render_template('dashboard.html')
+
+if __name__ == '__main__':
+    app.run(debug=False)
+```
+
+## vulnerability found
+
+1. missing input validation: username from `request.form.get('username')` is used directly without validation (risk of SQLi)
+
+2. lack of auth check: `/edit-profile` endpoint does not verify user's authentication.
+
+3. user profile update logic flaw: code checks if `user_profile.get_username() == username` but doesn't show how `user_profile` is updated with the new data.
+
+## fixed code
+
+```python
+from flask import Flask, render_template, request, redirect, url_for, session
+
+app = Flask(__name__)
+app.secret_key = 'your_secret_key'
+
+class UserProfileService:
+    def get_user_profile(self, username):
+        pass
+    def update_user_profile(self, user_profile):
+        pass
+
+user_profile_service = UserProfileService()
+
+@app.route('/edit-profile', methods=['POST'])
+def edit_profile():
+    if 'username' not in session:
+        return redirect(url_for('login')) # ensure user is logged in
+    username = session['username'] # use username from session to avoid tampering
+    user_profile = user_profile_service.get_user_profile(username)
+
+    # assuming there's a method to safely update user profile with sanitized inputs
+    if user_profile and user_profile.get_username() == username:
+        # update user_profile with sanitized form inputs here
+        user_profile_service.update_user_profile(user_profile)
+
+        return redirect(url_for('dashboard'))
+    return 'Unauthorized', 403
+
+@app.route('/dashboard')
+def dashboard():
+    return render_template('dashboard.html')
+
+@app.route('/login')
+def login():
+    # implement login logic
+    pass
+
+if __name__ == '__main__':
+    app.run(debug=False)
+```
+
+## changes made
+
+1. session-based authentication to verify if user is logged in + authorized to edit profile
+
+2. sanitize + validate all user inputs before processing (avoid injection attacks)
+
+3. set secret key for Flask to securely sign session cookie
+
+4. return unauthorized access message if user profile doesn't exist or username doesn't match
