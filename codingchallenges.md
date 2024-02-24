@@ -498,3 +498,147 @@ if __name__ == '__main__':
 ```
 
 this tool relies on NVD. 
+
+**9. create a secure login mechanism using multi-factor authentication (MFA) with time-based one-time passwords (TOTP) for enhanced security.**
+
+integrate secure password storage with `bcrypt`, secure TOTP secure storage, rate limit login attempts + TOTP verification.
+
+```bash
+pip install pyotp bcrypt
+```
+
+modify user model to store hashed passwords + store TOTP.
+
+```python
+import bcrypt
+import pyotp
+
+class User:
+    def __init__(self, username, hashed_password, totp_secret):
+        self.username = username
+        self.hashed_password = hashed_password # stores hashed password
+        self.totp_secret = totp_secret # can be encrypted
+```
+
+hash password and generate TOTP secret when registering a new user
+
+```python
+def hashed_password(password):
+    return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+
+def register_user(username, password):
+    hashed_password = hash_password(password)
+    totp_secret = pyotp.random_base32()
+    user = User(username, hashed_password, totp_secret)
+    # store this user object in the user management system
+
+    # generate + display TOTP URI for QR code generation
+    totp_uri = pyotp.totp.TOTP(totp_secret).provisioning_uri(name=username, issuer_name="APP")
+    print("register your TOTP with this URI:", totp_uri)
+    return user
+```
+
+for login, verify hashed password + TOTP code. implement some basic rate limiting by tracking login attempts.
+
+```python
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+
+# assume a flask app for rate limiting
+app = Flask(__name__)
+limiter = Limiter(
+    app,
+    key_func = get_remote_address,
+    default_limits = ["5 per minute", "100 per day"]
+)
+
+def verify_password(stored_hash, password_attempt):
+    return bcrypt.checkpw(password_attempt.encode('utf-8'), stored_hash)
+
+@app.route('/login', methods=['POST'])
+@limiter.limit("5 per minute") # rate limiting login attempts
+def login():
+    username = request.form['username']
+    password = request.form['password']
+    totp_code = request.form['totp_code']
+    user = get_user_by_username(username)
+
+    if not user or not verify_password(user.hashed_password, password):
+        return "login failed: incorrect username/password", 401
+    
+    totp = pyotp.TOTP(user.totp_secret)
+    if not totp.verify(totp_code):
+        return "login failed: invalid TOTP code", 401
+    
+    # login success
+    return "login successful!", 200
+```
+
+**10. develop a script to encrypt sensitive data at rest using AES encryption and securely store the encryption keys.**
+
+use `cryptography` library, include functions to generate encryption key, encrypt data using AES, decrypt data, and store encryption key using a key management solution.
+
+```bash
+pip install cryptography
+```
+
+```python
+from cryptography.hazmat.primitives.kdf.pbkdf2 import PNKDF2HMAC
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.kdf.scrypt import Scrypt
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.ciphers import Cipher, algorithms, modes
+from cryptography.hazmat.primitives import padding
+import os
+
+# keygen + storage
+def generate_key(password_provided, salt=os.urandom(16)):
+    password = password_provided.encode() # convert from string to bytes
+    kdf = Scrypt(
+        salt=salt, # salt used to prevent rainbow table attacks
+        length=32, # length of derived key (AES-256 requires 32-byte key)
+        n=2**14, # CPU/mem cost factor
+        r=8, # block size param (affects mem/CPU usage)
+        p=1, # parallelization param
+        backend=default_backend() # default crypto backend
+    )
+    key = kdf.derive(password) # derive secure key from password
+    return key, salt # return generated key + salt
+
+# encrypt data using AES
+def encrypt(data, key):
+    iv = os.urandom(16) # random initialization vector for AES
+    cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=default_backend()) # create cipher object for AES in CBC mode
+    encryptor = cipher.encryptor() # encryptor instance
+    padder = padding.PKCS7(128).padder() # padder for block size of 128 bits (AES block size)
+    padded_data = padder.update(data.encode()) + padder.finalize() # pad data to be multiple of block size
+    encrypted_data = encryptor.update(padded_data) + encryptor.finalize() # encrypt padded data
+    return encrypted_data, iv # return encrypted data + IV
+
+# decrypt data
+def decrypt(encrypted_data, key, iv):
+    cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=default_backend())
+    decryptor = cipher.decryptor()
+    decrypted_data = decryptor.update(encrypted_data) + decryptor.finalize()
+    unpadder = padding.PKCS7(128).unpadder()
+    unpadded_data = unpadder.update(decrypted_data) + unpadder.finalize() # remove padding
+    return unpadded_data.decode() # convert bytes back to string and return
+
+# example
+if __name__ = "__main__":
+    password = "secure_password" # define password for keygen
+    data_to_encrypt = "sensitive data!!!" # data to be encrypted
+
+    key, salt = generate_key(password) # generate encryption key using password
+    encrypted_data, iv = encrypt(data_to_encrypt, key) # encrypt data using generated key
+    decrypted_data = decrypt(encrypt_data, key, iv) # decrypt
+    
+    print(f"encrypted data: {encrypted_data}") # print encrypted data (bytes)
+    print(f"decrypted data: {decrypted_data}")
+```
+
+- generation of secure key from password using `Scrypt` (a key derivation function resistant to brute-force and rainbow table attacks by using a salt)
+
+- encryption/decryption uses AES in CBC mode (requires IV for added security)
+
+- padding applied to data before encryption to ensure it fits AES block size, and removed after decryption
