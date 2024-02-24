@@ -378,3 +378,123 @@ if __name__ = '__main__':
 
 **7. write code to implement role-based access control (RBAC) in an application to restrict user permissions based on their roles.**
 
+define roles, perms, and associating the roles with specific perms. assign roles to users that determine what actions they can perform.
+
+define permissions and roles first.
+
+```python
+class Permission:
+    def __init__(self, name):
+        self.name = name
+
+class Role:
+    def __init__(self, name):
+        self.name = name
+        self.permissions = []
+
+    def add_permission(self, permission):
+        self.permissions.append(permission)
+    
+    def has_permission(self, permission_name):
+        return any(permission.name == permission_name for permission in self.permissions)
+```
+
+then define users and assign roles.
+
+```python
+class User:
+    def __init__(self, username):
+        self.username = username
+        self.roles = []
+
+    def assign_role(self, role):
+        self.roles.append(role)
+    
+    def has_permission(self, permission_name):
+        return any(role.has_permission(permission_name) for role in self.roles)
+```
+
+implement RBAC in app logic
+
+```python
+# define permissions
+read_permission = Permission("read")
+write_permission = Permission("write")
+delete_permission = Permission("delete")
+
+# define roles
+admin_role = Role("admin")
+admin_role.add_permission(read_permission)
+admin_role.add_permission(write_permission)
+admin_role.add_permission(delete_permission)
+
+editor_role = Role("editor")
+editor_role.add_permission(read_permission)
+editor_role.add_permission(write_permission)
+
+viewer_role = Role("viewer")
+viewer_role.add_permission(read_permission)
+
+# create users + assign roles
+admin_user = User("admin_user")
+admin_user.assign_role(admin_role)
+
+editor_user = User("editor_user")
+editor_user.assign_role(editor_role)
+
+viewer_user = User("viewer_user")
+viewer_user.assign_role(viewer_role)
+
+# example (check if user has a specific permission)
+print(admin_user.has_permission("write")) # should return True
+print(viewer_user.has_permission("write")) # should return False
+```
+
+**8. build a script to automate the process of scanning dependencies for known vulnerabilities using tools like OWASP Dependency-Check.**
+
+identify project dependencies + check if there are known, publicly disclosed vulns.
+
+can run tool from CLI, but integrate into automation script (as part of CI/CD pipeline).
+
+install from github first, then write automation script in python.
+
+```python
+import subprocess
+import os
+
+# config
+dependency_check_path = 'dependency-check/bin/dependency-check.sh' # path to Dependency-Check CLI
+project_path = '/path/to/project' # path to project that needs to be scanned
+report_output_path = 'path/to/output/report' # where to save report
+report_format = 'HTML' # format can be HTML, XML, CSV, JSON, etc.
+
+def run_dependency_check():
+    # check if output path exists
+    if not os.path.exists(report_output_path):
+        os.makedirs(report_output_path)
+
+    # construct command to run Dependency-Check
+    command = [
+        dependency_check_path,
+        '--project', 'project name',
+        '--scan', project_path,
+        '--out', report_output_path,
+        '--format', report_format,
+        '--enableExperimental', # additional experimental analyzers
+        # add flags here
+    ]
+
+    # execute command
+    try:
+        print("starting Dependency-Check scan...")
+        result = subprocess.run(command, check=True, capture_output=True, text=True)
+        print("scan completed successfully!")
+        print(result.stdout)
+    except subprocess.CalledProcessError as e:
+        print("error during the scan:")
+        print(e.output)
+if __name__ == '__main__':
+    run_dependency_check()
+```
+
+this tool relies on NVD. 
