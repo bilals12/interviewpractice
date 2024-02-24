@@ -811,3 +811,11 @@ def submit():
 if __name__ == "__main__":
     app.run(debug=True)
 ```
+
+- unique CSRF token generated + stored in user session when accessing a form
+
+- CSRF token included in hidden field in each form that submits state-change request
+
+- `csrf_protect` decorator used to wrap routes handling POST requests. it extracts the token from session and form, comparing them to ensure they match. request aborted (403) if token is missing or they don't match.
+
+- token regenerated for each session to ensure uniqueness and is removed from session after verification (prevents reuse).
