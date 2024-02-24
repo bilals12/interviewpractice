@@ -642,3 +642,172 @@ if __name__ = "__main__":
 - encryption/decryption uses AES in CBC mode (requires IV for added security)
 
 - padding applied to data before encryption to ensure it fits AES block size, and removed after decryption
+
+**11. find out where soft deleted items are stored and write a script to pull them from local dbs**
+
+SQLite:
+
+```python
+import sqlite3
+from datetime import datetime, timedelta
+
+# db connection
+db_path = 'path.db'
+conn = sqlite3.connect(db_path)
+# mysql
+conn = mysql.connector.connect(
+    host="localhost",
+    user="your_username",
+    password="your_password",
+    database="your_database"
+)
+# postgreSQL
+conn = psycopg2.connect(
+    host="localhost",
+    user="your_username",
+    password="your_password",
+    database="your_database"
+)
+cursor = conn.cursor()
+
+# retrieve soft deleted items (last 30 days)
+def retrieve_soft_deleted_items(table_name):
+    # calculate date
+    thirty_days_ago = datetime.now() - timedelta(days=30)
+    thirty_days_ago_str = thirty_days_ago.strftime('%Y-%m-%d %H:%M:%S')
+
+    # query to select items marked deleted within 30 days ago
+    query = f"""
+    SELECT * FROM {table_name} WHERE deleted_at IS NOT NULL AND deleted_at > ?
+    """
+
+    # execute
+    cursor.execute(query, (thirty_days_ago_str,))
+
+    # return
+    return cursor.fetchall()
+
+# example
+if __name__ == '__main__':
+    table_name = 'table' # replace with table name
+    deleted_items = retrieve_soft_deleted_items(table_name)
+    for item in deleted_items:
+        print(item) # print each item
+```
+
+mongoDB:
+
+```python
+from pymongo import MongoClient
+from datetime import datetime, timedelta
+
+# connection setup
+client = MongoClient('mongodb://localhost:27017/')
+db = client['your_db'] # replace with db
+collection = db['collection'] # replace with your collection
+
+# retriever
+def retrieve_soft_deleted_items():
+    thirty_days_ago = datetime.now() - timedelta(days=30)
+    query = {'deleted_at': {'$gt': thirty_days_ago}}
+    deleted_items = collection.find(query)
+    return list(deleted_items)
+
+# example
+if __name__ == '__main__':
+    deleted_items = retrieve_soft_deleted_items()
+    for item in deleted_items:
+        print(item)
+```
+
+**12. Write a mini forensics tool to collect identifying information from PDF metadata.**
+
+```python
+import PyPDF2
+
+def extract_pdf_metadata(pdf_path):
+    """
+    args:
+    - pdf_path (str): path to the pdf file.
+    returns:
+    - dict: dict containing PDF metadata
+    """
+    try:
+        with open(pdf_path, 'rb') as file:
+            pdf_reader = PyPDF2.PdfFileReader(file)
+            metadata = pdf_reader.getDocumentInfo()
+            return metadata
+    except Exception as e:
+        print(f"error reading metadata: {e}")
+        return None
+
+def print_pdf_metadata(metadata):
+    """
+    args:
+    - metadata (dict): dict containing PDF metadata
+    """
+    if metadata:
+        print("PDF metadata:")
+        for key, value in metadata.items():
+            print(f"{key}: {value}")
+    else:
+        print("no metadata found")
+# example
+if __name__ == "__main__":
+    pdf_path = "path.pdf"
+    metadata = extract_pdf_metadata(pdf_path)
+    print_pdf_metadata(metadata)
+```
+
+**13. Design a script to implement Cross-Site Request Forgery (CSRF) protection in a web application using token-based validation.**
+
+use token-based validation (generate unique token for each user session, use token in each state-change request)
+
+```python
+from flask import Flask, request, session, abort
+from functools import wraps
+import os
+
+app = Flask(__name__)
+app.secret_key = os.urandom(24) # random secret key gen (keep secure!)
+
+# generate CSRF token + store it in user session
+def generate_csrf_token():
+    if 'csrf_token' not in session:
+        session['csrf_token'] = os.urandom(64).hex() # generate random token
+    return session['csrf_token']
+
+app.jinja_env.globals['csrf_token'] = generate_csrf_token # make csrf_token available in templates
+
+def csrf_protect(f):
+    # decorator to enforce CSRF protection
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if request.method == "POST":
+            # verify token
+            token = session.pop('csrf_token', None)
+            request_token = request.form.get('csrf_token')
+            if not token or token != request_token:
+                abort(403) # forbidden if tokens don't match
+        return f(*args, **kwargs)
+    return decorated_function
+
+@app.route('/form', methods=['GET'])
+def form():
+    # render form for POST request (must include CSRF token)
+    return '''
+    <form action="/submit" method="post">
+        <input type="hidden" name="csrf_token" value="{csrf_token}" />
+        <input type="submit" value="Submit" />
+    </form>
+    '''.format(csrf_token=generate_csrf_token())
+
+@app.route('/submit', methods=['POST'])
+@csrf_protect
+def submit():
+    # form submission logic
+    return "form submitted!"
+
+if __name__ == "__main__":
+    app.run(debug=True)
+```
