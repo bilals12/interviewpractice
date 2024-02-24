@@ -1,4 +1,4 @@
-1. implement a function to sanitize user input to prevent XSS in a web application.
+**1. implement a function to sanitize user input to prevent XSS in a web application.**
 
 ```python
 import html
@@ -26,7 +26,7 @@ if __name__ == "__main__":
 
 the output of this program would now be: `&lt;script&gt;alert(&#x27;XSS!&#x27;)&lt;/script&gt;`. [escapes `<`, `>`, `'` into `&lt;`, `&gt;`, `&#x27;`]
 
-2. develop a script to simulate a SQLi attack on a sample db, and propose a solution to prevent such attacks.
+**2. develop a script to simulate a SQLi attack on a sample db, and propose a solution to prevent such attacks.**
 
 we'll develop the attack using python and SQLite (disk-based db that doesn't require separate server process) then create a prevention technique using parametrized queries.
 
@@ -79,7 +79,7 @@ print(f"secure result: {result}")
 
 this code ensures that user input is treated as data, not as part of the SQL command. 
 
-3. write code to generate/validate JSON Web Tokens (JWT) for secure authentication in a web app.
+**3. write code to generate/validate JSON Web Tokens (JWT) for secure authentication in a web app.**
 
 JWT is used for secure auth by transmitting information between parties as a JSON object. it's good for securing RESTful APIs and single-page apps (SPAs).
 
@@ -156,7 +156,7 @@ generated JWT: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxMjMsInVzZXJ
 token is valid. payload: {'user_id': 123, 'username': 'testuser', 'exp': 1708802254}
 ```
 
-4. create a secure password hashing function using `bcrypt` or `PBKDF2` to store passwords securely in a db.
+**4. create a secure password hashing function using `bcrypt` or `PBKDF2` to store passwords securely in a db.**
 
 `bcrypt` automatically handles salt generation + storage as part of the hashed password (makes each hash unique even for identical passwords).
 
