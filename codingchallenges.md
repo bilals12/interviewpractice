@@ -958,3 +958,25 @@ if __name__ == "__main__":
 **21. Create a function to securely handle user sessions by implementing session fixation prevention measures in a stateful web application.**
 
 **22. Develop a script to perform input/output validation on external system calls to prevent Command Injection vulnerabilities in an application.**
+
+# hard questions!
+
+**23. Develop a script to implement a custom cryptographic protocol for secure communication between two endpoints, ensuring confidentiality, integrity, and authenticity.**
+
+**24. Design a function to detect and mitigate Blind SQL Injection vulnerabilities in a complex database query system with limited error-based feedback.**
+
+**25. Write code to implement a secure sandbox environment for executing untrusted code snippets while preventing code injection and privilege escalation.**
+
+**26. Create a script to perform runtime memory analysis and exploit detection to identify and prevent buffer overflow vulnerabilities in a C/C++ application.**
+
+**27. Develop a function to implement dynamic taint analysis for tracking user-controlled input flow through the application's data flow paths to prevent data leakage.**
+
+**28. Design a secure logging mechanism that includes log integrity verification, log encryption, and tamper-evident logging to ensure data confidentiality and integrity.**
+
+**29. Write code to implement a secure key management system using Hardware Security Modules (HSMs) for storing and protecting cryptographic keys.**
+
+**30. Develop a script to perform automated security fuzz testing on API endpoints with mutation-based fuzzing techniques to uncover hidden vulnerabilities.**
+
+**31. Create a function to implement runtime code integrity checks using Control Flow Integrity (CFI) mechanisms to prevent code-reuse attacks like Return-Oriented Programming (ROP).**
+
+**32. Design a secure microservices architecture with end-to-end encryption, mutual TLS authentication, and distributed access control policies for inter-service communication in a cloud-native environment.**
