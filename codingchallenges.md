@@ -819,3 +819,142 @@ if __name__ == "__main__":
 - `csrf_protect` decorator used to wrap routes handling POST requests. it extracts the token from session and form, comparing them to ensure they match. request aborted (403) if token is missing or they don't match.
 
 - token regenerated for each session to ensure uniqueness and is removed from session after verification (prevents reuse).
+
+**14. Develop a function to validate and sanitize user input to prevent XML External Entity (XXE) attacks in an XML parsing module.**
+
+XXE attacks exploit XML parsers by tricking them into executing unauthorized actions (accessing local/remote files). 
+
+```python
+from lxml import etree
+from io import StringIO
+
+def safe_parse(xml_input):
+    """
+    args:
+    - xml_input (str): string containing XML data to be parsed
+
+    returns:
+    - object: lxml.etree object if parse is successful (None, otherwise)
+    """
+    try:
+        # config XML parser to disable document type definitions (DTDs) + external entities
+        parser = etree.XMLParser(no_network=True, dtd_validation=False, load_dtd=False)
+        parser.resolvers.add(BlockExternalEntitiesResolver()) # custom resolver to block external entities
+
+        # parse XML
+        tree = etree.parse(StringIO(xml_input), parser)
+        return tree
+    except etree.XMLSyntaxError as e:
+        print(f"XML parsing error: {e}")
+        return None
+
+class BlockExternalEntitiesResolver(etree.Resolver):
+    """
+    custom revolver that prevents external entity resolution
+    """
+    def resolve(self, url, public_id, context):
+        return self.resolve_string("", context) # return empty string for external entity
+    
+# example
+if __name__ == "__main__":
+    xml_input = """<?xml version="1.0"?>
+    <!DOCTYPE data [
+    <!ENTITY example SYSTEM "file:///etc/passwd">
+    ]>
+    <data>&example;</data>"""
+    result = safe_parse(xml_input)
+    if result is not None:
+        print("XML parsed without XXE!")
+    else:
+        print("failed to parse XML")
+```
+
+**15. Write code to implement secure cookie attributes such as HttpOnly and Secure flags to enhance session security in a web application.**
+
+the flags help mitigate risks of client-side script access to protected cookie data and ensure cookies are sent over HTTPS. 
+
+```python
+from flask import Flask, request, make_response
+app = Flask(__name__)
+
+@app.route('/')
+def index():
+    # create response object
+    resp = make_response("hello, world!")
+
+    # set secure cookie on response
+    resp.set_cookie(
+        'session_id',
+        'secure_session_id',
+        secure=True, # cookie sent over HTTPS
+        httponly=True, # prevent access to cookie via client-side script (XSS)
+        samesite='Lax' # Strict/Lax restricts cross-site sharing
+    )
+    return resp
+if __name__ == "__main__":
+    app.run(ssl_context='adhoc') # testing with self-signed cert
+```
+
+**16. Create a script to detect and prevent Insecure Direct Object References (IDOR) vulnerabilities in an API endpoint.**
+
+IDOR occurs when an app provides direct access to objects based on user input. 
+validate current user's perms to access requested object. 
+assume there's a user auth system and each object (profile) has an associated user ID to check against.
+
+```python
+from flask import Flask, request, jsonify, abort
+from functools import wraps
+
+app = Flask(__name__)
+
+# function that fetches user ID from session
+def get_user_id():
+    # in a real app, return auth user ID from session or token
+    return 1 # assuming user with ID 1 is current user
+
+# db of user profiles
+user_profiles = {
+    1: {"id": 1, "name": "john", "email": "john@example.com"},
+    2: {"id": 2, "name": "jane", "email": "jane@example.com"},
+}
+
+def access_require(f):
+    """
+    decorator that checks if current user has access to requested user object
+    """
+    @wraps(f)
+    def decorated(user_id, *args, **kwargs):
+        current_id = get_user_id()
+        if current_id != user_id:
+            abort(403) # if IDs don't match
+        return f(user_id, *args, **kwargs)
+    return decorated
+
+@app.route('/api/user/<int:user_id>', methods=['GET'])
+@access_require
+def get_profile(user_id):
+    """
+    API endpoint that gets user profile
+    access restricted to profile owner!
+    """
+    user_profile = user_profiles.get(user_id)
+    if user_profile:
+        return jsonify(user_profile)
+    else:
+        abort(404) # if profile doesn't exist
+    
+if __name__ == "__main__":
+    app.run(debug=True)
+```
+
+**17. Implement a secure password policy enforcement mechanism that includes complexity requirements and password expiration in a user authentication system.**
+
+**18. Develop a function to securely handle error messages to prevent information leakage that could be exploited by attackers.**
+
+**19. Design a script to enforce Content-Type validation for file uploads to prevent MIME sniffing attacks in a web application.**
+
+**20. Write code to implement data encryption at the field level using format-preserving encryption techniques for sensitive information storage.**
+
+**21. Create a function to securely handle user sessions by implementing session fixation prevention measures in a stateful web application.**
+
+**22. Develop a script to perform input/output validation on external system calls to prevent Command Injection vulnerabilities in an application.**
