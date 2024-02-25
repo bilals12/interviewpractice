@@ -953,17 +953,239 @@ if __name__ == "__main__":
 
 **19. Design a script to enforce Content-Type validation for file uploads to prevent MIME sniffing attacks in a web application.**
 
-**20. Write code to implement data encryption at the field level using format-preserving encryption techniques for sensitive information storage.**
+**20. Write code to implement data encryption at the field level using format-preserving encryption (FPE) techniques for sensitive information storage.**
+
+this allows output (encrypted) to be in the same format as input (original, unencrypted). useful for encrypting stuff like credit card numbers, social security numbers, other PII.
+
+```python
+import pyffx
+
+def encrypt_data(secret_key, data, domain=None):
+    """
+    args:
+    - secret_key (str): used for encryption
+    - data (str): data to be encrypted
+    - domain (tuple): tuple defining domain of chars for encryption 
+    returns:
+    - str: encrypted data
+    """
+    # determine domain based on data type if not specified
+    if not domain:
+        if data.isdigit():
+            domain = ('0123456789', len(data)) # numeric
+        else:
+            raise ValueError("domain must be specified for non-numeric data")
+    
+    # init FPE object with secret key + domain
+    e = pyffx.Integer(secret_key, domain[0], length=domain[1])
+
+    # encrypt data
+    encrypted_data = e.encrypt(int(data))
+
+    # return encrypted data (padded to maintain format)
+    return str(encrypted_data).zfill(domain[1])
+
+def decrypt_data(secret_key, encrypted_data, domain=None):
+    if not domain:
+        if encrypted_data.isdigit():
+            domain = ('0123456789', len(encrypted_data))
+        else:
+            raise ValueError("domain must be specified for non-numeric data")
+    
+    # init FPE object
+    d = pyffx.Integer(secret_key, domain[0], length=domain[1])
+
+    # decrypt data
+    decrypted_data = d.decrypt(int(encrypted_data))
+
+    return str(decrypted_data).zfill(domain[1])
+
+# example
+if __name__ == "__main__":
+    secret_key = "secret"
+    original_data = "1234567890123456" # example data (credit card number etc)
+
+    encrypted_data = encrypt_data(secret_key, original_data)
+    decrypted_data = decrypt_data(secret_key, encrypted_data)
+
+    print(f"original data: {original_data}")
+    print(f"encrypted data: {encrypted_data}")
+    print(f"decrypted data: {decrypted_data}")
+```
+
+
 
 **21. Create a function to securely handle user sessions by implementing session fixation prevention measures in a stateful web application.**
 
 **22. Develop a script to perform input/output validation on external system calls to prevent Command Injection vulnerabilities in an application.**
 
+sanitize user input!
+
+assume a feature that allows users to ping a specified host check its availability
+
+```python
+import subprocess
+import re
+
+def valid_hostname(hostname):
+    """
+    validates hostname using regex to ensure it consists of alphanumeric chars, hyphens, periods. very basic validation!
+    """
+    pattern = r'^[a-zA-Z0-9.-]+$'
+    if re.match(pattern, hostname):
+        return True
+    else:
+        return False
+
+def safe_ping(hostname):
+    """
+    ping host by validating hostname before executing system command
+    args:
+    - hostname (str)
+    returns:
+    - str: result of ping
+    """
+
+    # validate hostname
+    if not valid_hostname(hostname):
+        return "error: invalid hostname"
+    
+    # construct command with validated input
+    command = ["ping", "-c", "4", hostname]
+
+    # execute command without shell
+    try:
+        output = subprocess.check_output(command, stderr=subprocess.STDOUT, universal_newlines=True)
+        return output
+    except subprocess.CalledProcessError as e:
+        return f"command execution failed: {e.output}"
+
+# example
+if __name__ == "__main__":
+    hostname = input("enter hostname to ping: ").strip()
+    result = safe_ping(hostname)
+    print(result)
+```
+
 # hard questions!
 
 **23. Develop a script to implement a custom cryptographic protocol for secure communication between two endpoints, ensuring confidentiality, integrity, and authenticity.**
 
+AES for symmetric encryption
+HMAC for integrity check, RSA for digital signatures
+
+```python
+from cryptography.hazmat.primitives import hashes, hmac
+from cryptography.hazmat.primitives.asymmetric import rsa, padding
+from cryptography.hazmat.primitives.serialization import PublicFormat, Encoding
+from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import serialization
+from cryptography.fernet import Fernet
+import os
+
+# keygen for RSA
+private_key = rsa.generate_private_key(public_exponent=65537, key_size=2048, backend=default_backend())
+public_key = private_key.public_key()
+
+# symmetric keygen for AES
+symmetric_key = Fernet.generate_key()
+cipher = Fernet(symmetric_key)
+
+# encrypt message using fernet (AES)
+def encrypt_message(message):
+    encrypted_message = cipher.encrypt(message.encode())
+    return encrypted_message
+
+# decrypt message
+def decrypt_message(encrypted_message):
+    decrypted_message = cipher.decrypt(encrypted_message)
+    return decrypted_message.decode()
+
+# sign message using private RSA key
+def sign_message(message):
+    signature = private_key.sign(
+        message,
+        padding.PSS(
+            mgf=padding.MGF1(hashes.SHA256()),
+            salt_length=padding.PSS.MAX_LENGTH
+        ),
+        hashes.SHA256()
+    )
+    return signature
+
+# verify signature using public RSA key
+def verify_signature(message, signature):
+    try:
+        public_key.verify(
+            signature,
+            message,
+            padding.PSS(
+                mgf=padding.MGF1(hashes.SHA256()),
+                salt_length=padding.PSS.MAX_LENGTH
+            ),
+            hashes.SHA256()
+        )
+        return True
+    except Exception as e:
+        return False
+
+# example
+if __name__ == "__main__":
+    original_message = "message!"
+    encrypted_message = encrypt_message(original_message)
+    decrypted_message = decrypt_message(encrypted_message)
+    signature = sign_message(encrypted_message)
+
+    print(f"original: {original_message}")
+    print(f"encrypted: {encrypted_message}")
+    print(f"decrypted: {decrypted_message}")
+    print(f"verification: ", verify_signature(encrypted_message, signature))
+```
+
 **24. Design a function to detect and mitigate Blind SQL Injection vulnerabilities in a complex database query system with limited error-based feedback.**
+
+```python
+import sqlite3
+
+def safe_query(db_path, query, params):
+    """
+    args:
+    - db_path (str): path to db
+    - query (str): query to execute, with placeholders for params
+    - params (tuple): params to safely inject into query
+    returns:
+    - list: query results
+    """
+
+    # connect
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+
+    # execute query safely
+    try:
+        cursor.execute(query, params)
+        results = cursor.fetchall()
+        return results
+    except sqlite3.Error as e:
+        print(f"db error: {e}")
+        return []
+    finally:
+        # close connection
+        conn.close()
+
+# example
+if __name__ = "__main__":
+    db_path = 'path/to/db.db'
+    # parametrized query
+    query = "SELECT * FROM users WHERE username = ? AND password = ?"
+    params = ('exampleUser', 'examplePass') # user input should be sanitized and passed here
+    results = safe_query(db_path, query, params)
+    for row in results:
+        print(row)
+
+```
+
 
 **25. Write code to implement a secure sandbox environment for executing untrusted code snippets while preventing code injection and privilege escalation.**
 
@@ -976,6 +1198,40 @@ if __name__ == "__main__":
 **29. Write code to implement a secure key management system using Hardware Security Modules (HSMs) for storing and protecting cryptographic keys.**
 
 **30. Develop a script to perform automated security fuzz testing on API endpoints with mutation-based fuzzing techniques to uncover hidden vulnerabilities.**
+
+mutation based fuzzing: inputs systematically modified (mutated) to generate test cases
+
+`@given` used to generate test inputs (`data`) which are mutated strings of at least 1 character
+
+`strategies` module defines type/characteristics of test data
+
+script makes POST request to specified endpoint with mutated data.
+
+any status code outside common codes might indicate a potential vuln.
+
+
+
+```python
+import requests
+from hypothesis import given, strategies as st
+
+API_ENDPOINT = 'http://example.com/api/v1/endpoint'
+
+@given(data=st.text(min_size=1)) # generating random strings
+def fuzz_endpoint(data):
+    try:
+        response = requests.post(API_ENDPOINT, data={'data': data}, timeout=5) # assuming POST request
+        # analyze response
+        if response.status_code not in [200, 400, 401, 403, 404]:
+            print(f"potential vuln found with input '{data}'")
+            print(f"status code: {response.status_code}, response: {response.text}")
+    except requests.exceptions.RequestException as e:
+        print(f"request failed: {e}")
+
+# example
+if __name__ == "__main__":
+    fuzz_endpoint()
+```
 
 **31. Create a function to implement runtime code integrity checks using Control Flow Integrity (CFI) mechanisms to prevent code-reuse attacks like Return-Oriented Programming (ROP).**
 
