@@ -1601,13 +1601,89 @@ notes:
 
 - backup first
 
-**Write code to implement a secure session hijacking detection mechanism using behavioral analysis and anomaly detection algorithms.**
+**38. Write code to implement a secure session hijacking detection mechanism using behavioral analysis and anomaly detection algorithms.**
 
-**Create a script to automate the process of identifying and patching known vulnerabilities in third-party libraries and dependencies using vulnerability databases like NVD.**
+**39. Create a script to automate the process of identifying and patching known vulnerabilities in third-party libraries and dependencies using vulnerability databases like NVD.**
 
-**Develop a function to implement secure deserialization practices to prevent deserialization vulnerabilities like remote code execution in Java or .NET applications.**
+**40. Develop a function to implement secure deserialization practices to prevent deserialization vulnerabilities like remote code execution in Java or .NET applications.**
+
+this occurs when ana app deserializes untrusted data, leading to execution of malicious code.
+
+java:
+
+- libraries like Jackon/Gson for JSON parsing provide more control (don't automatically execute methods on deserialized objects)
+
+- custom `readObject` methods to validate/sanitize before deserialization
+
+- serialization filters like `java.io.ObjectInputFilter` specify criteria for incoming data
+
+```java
+import java.io.*;
+public class SafeDeserialization {
+    public static void setupSerializationFilter() {
+        ObjectInputFilter filter = info -> {
+            if (info.depth() > 5) {
+                // limit depth to prevent complex data structures
+                return ObjectInputFilter.Status.REJECTED;
+            }
+            if (info.references() > 1000) {
+                // limit references to prevent reference flooding
+                return ObjectInputFilter.Status.REJECTED;
+            }
+            return ObjectInputFilter.Status.ALLOWED;
+        };
+        ObjectInputFilter.Config.setSerialFilter(filter);
+    }
+    public static Object safelyDeserialization(byte[] data) throws IOException, ClassNotFoundException {
+        setupSerializationFilter();
+
+        try (ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(data))) {
+            return ois.readObject();
+        } catch (InvalidClassException | StreamCorruptedException | ClassNotFoundException e) {
+            // handle exception
+            throw e;
+        }
+    }
+    public static void main(String[] args) {
+        // code code code
+    }
+}
+```
+
+in .NET:
+
+```csharp
+using System;
+using System.Runtime.Serialization;
+using System.IO;
+using Newtonsoft.Json;
+
+[DataContract]
+public class SafeObject {
+    [DataMember]
+    public string Data { get; set; }
+}
+
+public class SafeDeserialization {
+    public static T Deserialize<T>(string json) {
+        // additional validation logic here
+        return JsonConvert.DeserializeObject<T>(json);
+    }
+
+    public static void Main(string[] args) {
+        // example
+        string safeJson = "{\"Data\":\"Safe Data\"}";
+        var safeObject = Deserialize<SafeObject>(safeJson);
+        Console.WriteLine(safeObject.Data);
+    }
+}
+```
 
 
-**Develop a script to perform static code analysis on source code files to identify security vulnerabilities such as buffer overflows, injection flaws, and insecure cryptographic practices.**
 
-**Create a function to implement secure cross-origin resource sharing (CORS) policies with fine-grained access controls and preflight request handling in a web application.**
+
+
+
+**41. Develop a script to perform static code analysis on source code files to identify security vulnerabilities such as buffer overflows, injection flaws, and insecure cryptographic practices.**
+
+**42. Create a function to implement secure cross-origin resource sharing (CORS) policies with fine-grained access controls and preflight request handling in a web application.**
