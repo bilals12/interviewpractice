@@ -1603,6 +1603,44 @@ notes:
 
 **38. Write code to implement a secure session hijacking detection mechanism using behavioral analysis and anomaly detection algorithms.**
 
+use heuristics here: IP address consistency + user agent string matching to flag potential hijacking attempts
+
+irl use stuff like session duration, request patterns, geolocation, etc.
+
+```python
+import hashlib
+
+class Session:
+    def __init__(self, user_id, ip_addr, user_agent):
+        self.user_id = user_id
+        self.ip_addr = ip_addr
+        self.user_agent = user_agent
+        self.session_token = self.generate_session_token()
+
+    def session_token_gen(self):
+        hash_input = (self.user_id + self.ip_addr + self.user_agent).encode()
+        return hashlib.sha256(hash_input).hexdigest()
+
+    def validate_session(self, ip_addr, user_agent):
+        # if IP or user agent changes, flag as potential hijack
+        if self.ip_addr != ip_addr or self.user_agent != user_agent:
+            return False # potential hijacking detected
+        return True # session may be legit
+# example
+orig_session = Session("user123", "192.168.1.1", "Mozilla/5.0")
+
+# simulate request from same user but different IP + UA
+req_ip = "192.168.1.2" # changed network
+req_ua = "Mozilla/5.0" # same browser
+
+if orig_session.validate_session(req_ip, req_ua):
+    print("session valid")
+else:
+    print("potential session hijack")
+```
+
+
+
 **39. Create a script to automate the process of identifying and patching known vulnerabilities in third-party libraries and dependencies using vulnerability databases like NVD.**
 
 **40. Develop a function to implement secure deserialization practices to prevent deserialization vulnerabilities like remote code execution in Java or .NET applications.**
@@ -1687,3 +1725,32 @@ public class SafeDeserialization {
 **41. Develop a script to perform static code analysis on source code files to identify security vulnerabilities such as buffer overflows, injection flaws, and insecure cryptographic practices.**
 
 **42. Create a function to implement secure cross-origin resource sharing (CORS) policies with fine-grained access controls and preflight request handling in a web application.**
+
+**43. Implement a cypher which converts text to emoji or something.**
+
+```python
+def text_emoji(text):
+    char_emoji = {
+        'a': '😀', 'b': '😃', 'c': '😄', 'd': '😁', 'e': '😆',
+        'f': '😅', 'g': '😂', 'h': '🤣', 'i': '😊', 'j': '😇',
+        'k': '🙂', 'l': '🙃', 'm': '😉', 'n': '😌', 'o': '😍',
+        'p': '🥰', 'q': '😘', 'r': '😗', 's': '😙', 't': '😚',
+        'u': '😋', 'v': '😛', 'w': '😝', 'x': '😜', 'y': '🤪',
+        'z': '😏', ' ': '👻', '1': '1️⃣',
+        '2': '2️⃣', '3': '3️⃣', '4': '4️⃣', '5': '5️⃣',
+        '6': '6️⃣', '7': '7️⃣', '8': '8️⃣', '9': '9️⃣',
+        '0': '0️⃣'
+    }
+
+    # convert each char in input to emoji
+    emoji_mess = ''.join([char_emoji.get(char, '?') for char in text.lower()])
+
+    return emoji_mess
+
+# example
+input_t = "helloworld"
+emoji_t = text_emoji(input_t)
+print(f"original: {input_t}\nemoji: {emoji_t}")
+```
+
+
