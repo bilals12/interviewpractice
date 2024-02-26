@@ -1209,8 +1209,6 @@ script makes POST request to specified endpoint with mutated data.
 
 any status code outside common codes might indicate a potential vuln.
 
-
-
 ```python
 import requests
 from hypothesis import given, strategies as st
@@ -1235,4 +1233,381 @@ if __name__ == "__main__":
 
 **31. Create a function to implement runtime code integrity checks using Control Flow Integrity (CFI) mechanisms to prevent code-reuse attacks like Return-Oriented Programming (ROP).**
 
+potential whiteboard exercise. 
+
+CFI prevents code-reuse (like ROP) by validating target of each indirect function call at runtime. it points to a valid entry of allowed control flow transfers. these CFI mechanisms are implemented at compiler or OS level.
+
+some notes:
+
+- compiler level CFI options like Clang's `-fsanitize=cfi` or OS stuff designed for this purpose that analyze program's control flow graph at compile time (or enforce policies at runtime)
+
+- compiler-inserted checks are optimized for performance
+
+- irl CFI involves shadow stacks, indirect call site protections, fine-grain control flow graphs. 
+
+here's some python pseudocode.
+
+```python
+# dict to hold mapping of valid func calls
+# rudimentary CFI table where predefined func calls are allowed
+valid_func_calls = {
+    'func_a':['func_b', 'func_c'],
+    'func_b':['func_a'],
+    # other func relationships here
+}
+
+def func_a():
+    print("executing func_a")
+    # some condition/input to call func b or func c
+    cfi_check('func_b')
+
+def func_b():
+    print("executing func_b")
+    # per valid_func_calls table
+    cfi_check('func_a')
+
+def cfi_check(target_func, caller_func):
+    # simulate CFI check
+    # ensure target func is an allowed call
+    if target_func in valid_func_calls.get(caller_func, []):
+        # execute target func if it's valid
+        globals()[target_func]()
+    else:
+        print(f"CFI violation: {caller_func} is not allowed to call {target_func}")
+
+# example
+if __name__ == "__main__":
+    func_a() # start program
+```
+
 **32. Design a secure microservices architecture with end-to-end encryption, mutual TLS authentication, and distributed access control policies for inter-service communication in a cloud-native environment.**
+
+**33. Design a secure API authentication mechanism using OAuth 2.0 with JWT tokens, token revocation, and token introspection for secure authorization and access control.**
+
+- `/token` issues JWT tokens to authenticated users
+
+- `/revoke` revokes tokens (use a db/cache irl)
+
+- `/introspect` checks if token is active (not expired/revoked)
+
+```python
+from flask import Flask, request, jsonify
+import jwt
+import datetime
+
+app = Flask(__name__)
+
+SECRET_KEY = "secret_key"
+
+# store revoked tokens here (should be a more persistent storage in prod)
+REVOKED_TOKENS = set()
+
+@app.route('/token', methods=['POST'])
+def token_gen():
+    # simulated OAuth 2.0 token endpoint that issues JWT tokens
+    # irl, validate authorization grant here
+    user_id = request.json.get('user_id')
+    if not user_id:
+        return jsonify({"error": "missing user_id"}), 400
+
+    # generate token
+    payload = {
+        "user_id": user_id,
+        "exp": datetime.datetime.utcnow() + datetime.timedelta(minutes=30) # token expiry
+    }
+    token = jwt.encode(payload, SECRET_KEY, algorithm="HS256")
+    return jsonify({"token": token})
+
+@app.route('/revoke', methods=['POST'])
+def token_rev():
+    # token revoke
+    token = request.json.get('token')
+    if not token:
+        return jsonify({"error": "missing token"}), 400
+
+    # add token to set of revoked tokens
+    REVOKED_TOKENS.add(token)
+    return jsonify({"message": "token revoked"})
+
+@app.route('/introspect', methods=['POST'])
+def token_intro():
+    # token introspection
+    token = request.json.get('token')
+    if not token:
+        return jsonify({"error": "missing token"}), 400
+
+    # check if token is in revoked set
+    if token in REVOKED_TOKENS:
+        return jsonify({"active": False})
+
+    # verify + decode
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+        return jsonify({"active": True, "user_id": payload["user_id"]})
+    except jwt.ExpiredSignatureError:
+        return jsonify({"error": "token expired"}), 401
+    except jwt.InvalidTokenError:
+        return jsonify({"error": "invalid token"}), 401
+
+if __name__ == "__main__":
+    app.run(debug=True)
+```
+
+can also use `Authlib` with Flask to create a simple OAuth 2.0 server that issues JWT tokens.
+
+**34. Design a function to perform runtime code obfuscation techniques such as control flow flattening and string encryption to deter reverse engineering of critical application logic.**
+
+```python
+import random
+
+# add random if-else statements to flatten control flow
+def flow_flat(code):
+    obfusc_code = ""
+    for line in code.split('\n'):  # check if line is not empty
+        if line.strip():
+            obfusc_code += f"if random.choice([True, False]):\n {line}\n"
+        else:
+            obfusc_code += '\n'
+    return obfusc_code
+
+# caesar cipher encryption to obfuscate strings in code
+def string_encr(code):
+    encr_code = ""
+    for char in code:
+        encr_code += chr(ord(char) + 1) # caesar cipher encryption
+    return encr_code
+
+# example
+orig_code = """
+def main():
+    print("hello, world!")
+"""
+obfusc_code = flow_flat(orig_code)
+encr_code = string_encr(obfusc_code)
+
+print(f"original code: {orig_code}")
+print(f"\nobfuscated code: {obfusc_code}")
+print(f"\nencrypted code: {encr_code}")
+```
+
+given the example original code here:
+
+```python
+def main():
+    print("hello, world!")
+```
+
+the output would then be
+
+```python
+"obfuscated code": if random.choice([True, False]):
+def main():
+    print("hello, world!")
+```
+
+```python
+"encrypted code": ef!nboj"!qpxfs
+```
+
+**35. Design a secure data encryption scheme using homomorphic encryption techniques for performing computations on encrypted data without decrypting it, ensuring data privacy and confidentiality.**
+
+HE (homomorphic encryption): allows computations on ciphertexts. results in an encrypted result which matches the result of operations performed on the plaintext.
+
+PHE (partially homomorphic encryption): supports unlimited operations of 1 type (addition/multiplication)
+
+SWHE (somewhat homomorphic): supports limited number of addition and multiplication operations
+
+FHE (fully homomorphic): unlimited numbers of addition and multiplication
+
+use `PySEAL` (python wrapper around Microsoft SEAL library - a C++ lib that supports HE)
+
+setting up SEAL context involves defining polynomial modulus degree and coefficient modulus (security + efficiency of encryption)
+
+plaintext data must be encoded into a format suitable for homomorphism and then encrypted
+
+`evaluator` class is used to perform encrypted computations
+
+encrypted data must then be decrypted and decoded
+
+notes:
+
+- HE operations are computationally intensive. params chosen impact performance + security (tradeoff)
+
+- HE is good for implementing secure data processing without revealing it to the computing party
+
+
+```python
+import seal
+from seal import CKKSEncoder, Encryptor, Decryptor, Evaluator, SEALContext
+from seal import CoeffModulus, SchemeType, EncryptionParameters
+
+def seal_context(poly_modulus_degree=8192):
+    params = EncryptionParameters(SchemeType.CKKS)
+    params.set_poly_modulus_degree(poly_modulus_degree)
+    params.set_coeff_modulus(CoeffModulus.Create(poly_modulus_degree, [60, 40, 40, 60]))
+    context = SEALContext.Create(params)
+    return context
+
+def HE_ex():
+    context = seal_context()
+    encoder = CKKSEncoder(context)
+    encryptor = Encryptor(context, context.key_context_data().public_key())
+    decryptor = Decryptor(context, context.key_context_data().secret_key())
+    evaluator = Evaluator(context)
+
+    # encode + decrypt 2 numbers
+    num1, num2 = 5.0, 10.0
+    ptext1 = encoder.encode(num1, scale=2**40)
+    ptext2 = encoder.encode(num2, scale=2**40)
+    ctext1 = encryptor.encrypt(ptext1)
+    ctext2 = encryptor.encrypt(ptext2)
+
+    # homomorphically compute the sum
+    evaluator.add_inplace(ctext1, ctext2)
+
+    # decrypt + decode result
+    decr_result = decryptor.decrypt(ctext1)
+    deco_result = encoder.decode(decr_result)
+    print(f"result of homomorphic computation: {deco_result}")
+
+if __name__ == "__main__:
+    HE_ex()
+
+```
+
+**36. Write code to implement runtime memory protection mechanisms like Address Space Layout Randomization (ASLR) and Data Execution Prevention (DEP) to mitigate memory-based attacks.**
+
+these are usually implemented by the OS and the compiler of the app.
+
+ASLR: randomizes memory addresses used by sys/app processes. typically enabled at OS level.
+
+- windows: `/DYNAMICBASE` option with linker
+
+- linux: compilers like GCC enable ASLR by default, but make sure executable is not compiled with `-no-pie` (disables position independence) option. to enable: `gcc -o my_app my_app.c -fPIE -pie`
+
+DEP: prevents code from being executed in certain regions of mem, like stack/heap. 
+
+- windows: DEP enabled by default. use `/NXCOMPAT` linker to ensure.
+
+- linux: DEP aka NX (No-Execute) managed by OS. check if it's supported by looking for `nx` flag: `grep nx /proc/cpuinfo`
+
+here's some simplistic code
+
+```python
+import ctypes
+
+# ASLR
+try:
+    # set ADDR_NO_RANDOMIZE flag using personality
+    try:
+        result = ctypes.CDLL("libc.so.6").personality(0x004000)
+        if result == -1:
+            print("could not change process personality")
+        else:
+            print("ASLR disabled for process)
+    except Exception as e:
+        print(f"error altering ASLR setting: {e}")
+
+# DEP
+try:
+    if ctypes.windll.kernel32.SetProcessDEPPolicy(0x00000001):
+        print("DEP enabled")
+    else:
+        print("DEP could not be enabled")
+except Exception as e:
+    print("error enabling DEP:", e)
+```
+
+can also check if DEP is enabled like this
+
+```c
+#include <stdio.h>
+#include <windows.h>
+
+int main() {
+    DWORD dwFlags;
+    BOOL bRet = GetProcessDEPPolicy(GetCurrentProcess(), &dwFlags, NULL);
+    if (bRet) {
+        if (dwFlags & PROCESS_DEP_ENABLE) {
+            printf("DEP enabled for process\n");
+        } else {
+            printf("DEP not enabled for process\n");
+        }
+    } else {
+        printf("failed to retrieve DEP policy for process\n");
+    }
+    return 0;
+}
+```
+
+**37. Develop a script to implement a secure data masking algorithm for sensitive information in a database to protect privacy and comply with data protection regulations.**
+
+simple masking technique for emails and phone numbers
+
+```python
+import sqlite3
+import re
+
+def mask_email(email):
+    # email masker that keeps domain part intact
+    user, domain = email.split('@')
+    return f"{user[0]}***@{domain}"
+
+def mask_phone(phone):
+    # hide middle part of phone number
+    return f"{phone[:3]}***{phone[-3:]}"
+
+def update_data(db_path):
+    # connect to db and update info with masked values
+    try:
+        conn = sqlite3.connect(db_path)
+        cursor = conn.cursor()
+
+        # fetch
+        cursor.execute("SELECT id, email, phone FROM users")
+        users = cursor.fetchall()
+
+        for user in users:
+            user_id, email, phone = user
+            # apply mask
+            masked_email = mask_email(email)
+            masked_phone = mask_phone(phone)
+
+            # update db with masked vals
+            cursor.execute("UPDATE users SET email = ?, phone = ?, WHERE id = ?", (masked_email, masked_phone, user_id))
+
+        conn.commit()
+        print("data mask successful!")
+    except sqlite3.Error as e:
+        print(f"db error: {e}")
+    
+    finally:
+        if conn:
+            conn.close()
+
+# example
+if __name__ == "__main__:
+    db_path = "path/to/db.db"
+    update_data(db_path)
+```
+
+notes: 
+
+- irreversible. consider encryption
+
+- execute in secure manner if integrating with web apps/APIs
+
+- make sure it's compliant
+
+- backup first
+
+**Write code to implement a secure session hijacking detection mechanism using behavioral analysis and anomaly detection algorithms.**
+
+**Create a script to automate the process of identifying and patching known vulnerabilities in third-party libraries and dependencies using vulnerability databases like NVD.**
+
+**Develop a function to implement secure deserialization practices to prevent deserialization vulnerabilities like remote code execution in Java or .NET applications.**
+
+
+**Develop a script to perform static code analysis on source code files to identify security vulnerabilities such as buffer overflows, injection flaws, and insecure cryptographic practices.**
+
+**Create a function to implement secure cross-origin resource sharing (CORS) policies with fine-grained access controls and preflight request handling in a web application.**
