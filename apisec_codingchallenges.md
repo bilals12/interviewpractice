@@ -310,3 +310,133 @@ if __name__ == "__main__":
 - uses Flask's `before_request` and `after_request` decorators
 
 - `handle_exception` catches exceptions and logs error details
+
+**F. Write code to hash API secrets and encrypt database credentials for secure storage and access in API backend code.**
+
+use SHA-256 for hashing API secrets
+
+use `cryptography` library to encrypt db creds
+
+```python
+from hashlib import sha256
+from cryptography.fernet import Fernet
+import base64
+import os
+
+# hashing secrets using sha-256
+def hash_secret(secret):
+    return sha256(secret.encode()).hexdigest()
+
+# encryption/decryption of db creds
+def gen_key():
+    # encryption key
+    return base64.urlsafe_b64encode(os.urandom(32))
+
+def encrypt_data(data, key):
+    # encryption method
+    f = Fernet(key)
+    return f.encrypt(data.encode())
+
+def decrypt_data(encrypted_data, key):
+    # decryption method
+    f = Fernet(key)
+    return f.decrypt(encrypted_data).decode()
+
+# example
+if __name__ == "__main__":
+    # hashing API secret
+    api_secret = "super secret key"
+    hashed_secret = hash_secret(api_secret)
+    print(f"hashed API secret: {hashed_secret}")
+
+    # encrypting
+    db_creds = "user:password"
+    key = gen_key()
+    encrypted_creds = encrypt_data(db_creds, key)
+    print(f"encrypted db creds: {encrypted_creds}")
+
+    # decrypting
+    decrypted_creds = decrypt_data(encrypted_creds, key)
+    print(f"decrypted db creds: {decrypted_creds}")
+```
+
+**G. Develop automated API schema validation checks to prevent data type mismatches and enforce size limits, precision for numeric fields.**
+
+use `pydantic` or `marshmallow` for schema validation (define schema validation)
+
+```python
+from pydantic import BaseModel, Field, ValidationError
+from typing import List, Optional
+
+class User(BaseModel):
+    username: str = Field(..., min_length=3, max_length=50)
+    age: Optional[int] = Field(None, ge=18, le=120) # between 18 and 120
+    email: str
+    roles: List[str] = [] # list of roles
+    salary: Optional[float] = Field(None, gt=0, le=1000000.00) # greater than 0, less than/equal to 1,000,000
+
+def validate_input(user_data: dict):
+    try:
+        user = User(**user_data)
+        print(f"valid input: {user}")
+        return True
+    except ValidationError as e:
+        print(f"validation error: {e}")
+        return False
+
+# example (valid)
+valid = {
+    "username": "john",
+    "age": 30,
+    "email": "john@example.com",
+    "roles": ["admin", "user"],
+    "salary": 50000.90
+}
+
+# example (invalid)
+invalid = {
+    "username": "j",
+    "age": 17,
+    "email": "john@example.com",
+    "roles": ["admin", "user"],
+    "salary": 100000000
+}
+
+# validation
+validate_input(valid) # should pass
+validate_input(invalid) # should fail
+```
+
+**H. Develop a script to perform automated security fuzz testing on API endpoints with mutation-based fuzzing techniques to uncover hidden vulnerabilities.**
+
+mutation based fuzzing: inputs systematically modified (mutated) to generate test cases
+
+`@given` used to generate test inputs (`data`) which are mutated strings of at least 1 character
+
+`strategies` module defines type/characteristics of test data
+
+script makes POST request to specified endpoint with mutated data.
+
+any status code outside common codes might indicate a potential vuln.
+
+```python
+import requests
+from hypothesis import given, strategies as st
+
+API_ENDPOINT = 'http://example.com/api/v1/endpoint'
+
+@given(data=st.text(min_size=1)) # generating random strings
+def fuzz_endpoint(data):
+    try:
+        response = requests.post(API_ENDPOINT, data={'data': data}, timeout=5) # assuming POST request
+        # analyze response
+        if response.status_code not in [200, 400, 401, 403, 404]:
+            print(f"potential vuln found with input '{data}'")
+            print(f"status code: {response.status_code}, response: {response.text}")
+    except requests.exceptions.RequestException as e:
+        print(f"request failed: {e}")
+
+# example
+if __name__ == "__main__":
+    fuzz_endpoint()
+```

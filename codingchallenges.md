@@ -1754,4 +1754,64 @@ emoji_t = text_emoji(input_t)
 print(f"original: {input_t}\nemoji: {emoji_t}")
 ```
 
+**44. Write code to enforce transport layer security (TLS) for all traffic and implement certificate pinning to prevent man-in-the-middle attacks.**
+
+use `requests` library and `certifi` to enforce TLS and implement cert pinning. 
+
+need server's expected cert fingerprint (use browser or OpenSSL: `openssl s_client -connect yourdomain.com:443 -servername yourdomain.com | openssl x509 -noout -fingerprint -sha256`)
+
+output of fingerprint is like this:
+
+```bash
+SHA256 Fingerprint=12:34:56:78:9A:BC:DE:F0:12:34:56:78:9A:BC:DE:F0:12:34:56:78:9A:BC:DE:F0:12:34:56:78:9A:BC:DE:F0
+```
+
+```python
+import hashlib
+import requests
+from requests.exceptions import SSLError
+
+# SHA256 fingerprint
+exp_fingerprint = '12:34:56:78:9A:BC:DE:F0:12:34:56:78:9A:BC:DE:F0:12:34:56:78:9A:BC:DE:F0:12:34:56:78:9A:BC:DE:F0' # remove colons
+
+def get_fingerprint(url):
+    # get actual fingerprint of cert
+    try:
+        # make request to fetch
+        response = requests.get(url, timeout=5)
+        # access server cert
+        cert = response.raw.connection.sock.getpeercert(binary_form=True)
+        # calculate
+        sha256_fingerprint = hashlib.sha256(cert).hexdigest()
+        return sha256_fingerprint
+    except SSLError as e:
+        print(f"SSL error: {e}")
+        return None
+
+def verify_cert(url):
+    # verify cert matches fingerprint
+    fingerprint = get_fingerprint(url)
+    if fingerprint == exp_fingerprint:
+        print("cert verification successful")
+        return True
+    else:
+        print("cert verification failed!")
+        return False
+
+# verify with url
+url = 'https://yourdomain.com'
+
+if verify_cert(url):
+    # request logic
+    response = requests.get(url)
+    # response logic
+else:
+    # verification failure logic
+    print("aborting!")
+```
+
+
+
+
+
 
