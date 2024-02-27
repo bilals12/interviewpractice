@@ -1,3 +1,297 @@
+# some basic questions
+
+**Implement a simple API endpoint in Flask/Django that requires an API key validation before responding. The candidate should check for the presence of the API key in headers or parameters, validate it against pre-shared values in code/db, return 401 unauthorized response if invalid key.**
+
+create flask app, define API endpoint that checks for API key, validate key against pre-shared value, return 401 (unauthorized) if key is invalid
+
+```python
+from flask import Flask, request, jsonify
+
+app = Flask(__name__)
+
+# pre-shared API key
+VALID_KEY = {'hfhfhfhfhf'}
+
+@app.route('/data', methods=['GET'])
+def secure_data():
+    # extract API key from headers
+    api_key = request.headers.get('x-api-key')
+
+    # validate key
+    if api_key in VALID_KEY:
+        # some logic here for authorized users
+        return jsonify({"message": "access granted!"}), 200
+    else:
+        # API key not present or invalid
+        return jsonify({"error": "unauthorized"}), 401
+
+if __name__ == '__main__':
+    app.run(debug=True)
+```
+
+
+**Write a script that fetches data from a public API like weather/news API. The code should use requests library to make the API call over HTTPS, handle authentication if required in the form of API keys and validate the SSL certificates to prevent MITM attacks.**
+
+`requests` library supports HTTPS and validates SSL by default
+
+```python
+import requests
+
+def fetch_data(api_key, city):
+    # returns dict containing weather data
+    base_url = "https://api.openweathermap.org/data/2.5/weather"
+    params = {
+        "q": city,
+        "appid": api_key,
+        "units": "metric" # celsius
+    }
+    try:
+        response = requests.get(base_url, params=params)
+        # validate response
+        response.raise_for_status() # HTTPError if status is 4xx/5xx
+        return response.json() # parse + return JSON response
+    except requests.exceptions.HTTPError as errh:
+        return {"error": f"HTTP error: {errh}"}
+    except requests.exception.ConnectionError as errc:
+        return {"error": f"connection error: {errc}"}
+    except requests.exceptions.Timeout as errt:
+        return {"error": f"timeout error: {errt}"}
+    except requests.exceptions.RequestException as err:
+        return {"error": f"unexpected error: {err}"}
+    
+# example
+api_key = "hfhfhfhfhfhf" # replace with OpenWeatherMap API key
+city = "Toronto"
+weather_data = fetch_data(api_key, city)
+print(weather_data)
+```
+
+
+
+**Create a basic REST API in Python that requires JWT token based authentication. The candidate should implement JWT generation with claims, signature using HS256 and validate JWT token in the request before returning the response.**
+
+implement API with JWT auth
+
+```python
+from flask import Flask, jsonify, request, make_response
+from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
+
+app = Flask(__name__)
+
+# setup extension
+app.config['JWT_SECRET_KEY'] = 'your_secret_key'
+jwt = JWTManager(app)
+
+# mock db of registered users
+users = {"user1": "password"}
+
+@app.route('/login', methods=['POST'])
+def login():
+    username = request.json.get('username', None)
+    password = request.json.get('password', None)
+
+    # validate user creds
+    if username not in users or users[username] != password:
+        return jsonify({"msg": "bad username/password"}), 401
+
+    # create JWT token
+    access_token = create_access_token(identity=username)
+    return jsonify({access_token=access_token})
+
+
+
+```
+
+**Develop code to upload a file to a cloud storage API like S3/Cloudinary/Azure Blob Storage by making proper access key based authenticated requests for secure file transfer over TLS.**
+
+upload file to S3
+use `boto3` library
+
+```bash
+pip install boto3
+```
+
+configure AWS creds 
+create cred file (`~/.aws/credentials` on unix, `%UserProfile\.aws\credentials` on windows)
+
+```java
+[default]
+aws_access_key_id = YOUR_ACCESS_KEY
+aws_secret_access_key = YOUR_SECRET_KEY
+```
+
+now upload file using python
+
+```python
+import boto3
+from botocore.exceptions import NoCredentialsError
+
+def upload(file_name, bucket_name, object_name=None):
+    # if S3 object name not specified, use file_name
+    if object_name is None:
+        object_name = file_name
+
+    # upload file
+    s3_client = boto3.client('s3')
+    try:
+        s3_client.upload_file(file_name, bucket_name, object_name)
+    except NoCredentialsError:
+        print("creds not available")
+        return False
+    return True
+
+# example
+file_name = 'path/to/file'
+bucket_name = 's3-bucket'
+object_name = 'object-name' # optional
+
+success = upload(file_name, bucket_name, object_name)
+if success:
+    print("file uploaded!")
+else:
+    print("upload failed.")
+```
+
+**Write a script to access and manipulate remote database like MongoDB Atlas by connecting using SRV connection strings from python application, handling TLS/SSL to encrypt traffic between app and database.**
+
+```bash
+pip install pymongo
+```
+
+the connection string
+
+```php
+mongodb+srv://<username>:<password>@<cluster-url>/test?retryWrites=true&w=majority
+```
+
+atlas automatically uses TLS/SSL as long as you use SRV connection string
+
+```python
+from pymongo import MongoClient
+from pymongo.errors import ConnectionFailure
+
+# connection string
+uri = "mongodb+srv://<username>:<password>@<cluster-url>/test?retryWrites=true&w=majority"
+
+# connect to cluster
+client = MongoClient(uri)
+
+try:
+    # ismaster command doesn't require auth
+    client.admin.command('ismaster')
+    print("connection successful!")
+except ConnectionFailure:
+    print("connection failed.")
+
+# specify db/collection
+db = client['db_name']
+collection = db['coll_name']
+
+# insert document
+insert_result = collection.insert_one({"name": "john doe", "email": "john@example.com"})
+print(f"inserted document id: {insert_result.inserted_id})
+
+# find document
+found_document = collection.find_one({"name": "john doe"})
+print(f"found document: {found_document}")
+
+# close connection
+client.close()
+```
+
+**Create a simple microservice that fetches data from another microservice by making an internal API call. The code should implement mutual TLS authentication between the services to establish identity and secure communication.**
+
+mTLS: both client + server authenticate each other
+
+## flask
+
+setting up server
+set up a simple Flask app with 1 route (`/data`). 
+configured to use SSL with `ssl_context`, which is set up to require client certs (`ssl.CERT_REQUIRED`)
+
+```python
+from flask import Flask, jsonify
+import ssl
+
+app = Flask(__name__)
+
+@app.route('/data')
+def get_data():
+    return jsonify({'message': 'secure data from microservice'})
+
+if __name__ == '__main__':
+    context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
+    context.load_cert_chain(certfile='server.crt', keyfile='server.key')
+    context.load_verify_locations(cafile='ca.crt')
+    context.verify_mode = ssl.CERT_REQUIRED
+    app.run(port=5001, ssl_context=context)
+```
+
+setting up client
+
+```python
+import requests
+from requests.packages.urllib3.util.ssl_ import create_urllib3_context
+
+# custom ssl context to enforce client cert
+ssl_context = create_urllib3_context(
+    cert_reqs='CERT_REQUIRED',
+    ca_certs='ca.crt', # path to CA cert
+    keyfile='client.key', # path to client's priv key
+    certfile='client.crt' # path to client's cert
+)
+def fetch_data():
+    # fetch data from microservice
+    response = requests.get('https://localhost:5001/data', verify='ca.crt', cert=('client.crt', 'client.key'), # client cert for authentication
+    proxies={'https': None}) # avoid proxies in local setup
+
+    print(response.json())
+if __name__ == '__main__':
+    fetch_data()
+```
+
+## fastAPI
+
+server setup
+
+```python
+from fastapi import FastAPI
+app = FastAPI()
+
+@app.get("/data")
+async def get_data():
+    return {"message": "secure data from microservice"}
+```
+
+to enforce mTLS, run uvicorn with SSL configs pointing to server cert, private key and CA cert for client auth
+run server from command line
+
+```bash
+uvicorn app:app --host 0.0.0.0 --port 5001 --ssl-keyfile=./server.key --ssl-certfile=./server.crt --ssl-ca-certs=./ca.crt --ssl-cert-reqs=2
+```
+
+setting up client
+use `httpx` which is async
+
+```python
+import httpx
+
+async def fetch_data():
+    async with httpx.AsyncClient(verify='ca.crt', cert=('client.crt', 'client.key')) as client:
+        response = await client.get('https://localhost:5001/data')
+        print(response.json())
+```
+
+server managed by ASGI server (uvicorn) command line options for SSL
+
+
+
+
+
+
+# some more complicated questions
+
+
 **A. Develop a script to implement OAuth 2.0 authentication with JWT tokens for securing access to an API endpoint.**
 
 need:
@@ -440,3 +734,194 @@ def fuzz_endpoint(data):
 if __name__ == "__main__":
     fuzz_endpoint()
 ```
+
+**I. Write code to add CORS origins, headers for cross-origin resource sharing configuration in Flask/Django REST framework based APIs.**
+
+## flask
+
+```bash
+pip install flask-cors
+```
+
+```python
+from flask import Flask
+from flask_cors import CORS
+
+app = Flask(__name__)
+
+# config CORS globally (all routes)
+CORS(app)
+
+# config CORS for specific routes/origins
+cors = CORS(app, resources={r"/api/*": {"origins": "*"}}, supoorts_credentials=True)
+
+@app.route('/api/example')
+def example():
+    return 'CORS-enabled route'
+
+if __name__ == "__main__":
+    app.run(debug=True)
+```
+
+## django
+
+```bash
+pip install django-cors-headers
+```
+
+add `corsheaders` to `INSTALLED_APPS` in `settings.py`:
+
+```python
+INSTALLED_APPS = [
+    'corsheaders',
+    ...
+]
+```
+
+add `CorsMiddleware` to `MIDDLEWARE` (place it before middleware that can generate responses (`CommonMiddleware` or `WhiteNoiseMiddleware`))
+
+```python
+MIDDLEWARE =  [
+    'corsheaders.middleware.CorsMiddleware,
+    ...
+]
+```
+
+configure in `settings.py`:
+
+```python
+CORS_ALLOW_ALL_ORIGINS = True # allow all origins (not good for prod)
+
+CORS_ALLOWED_ORIGINS = [
+    "https://example.com",
+    "https://another.com",
+]
+```
+
+if API needs to accept cookies or auth headers from frontend, add following:
+
+```python
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_HEADERS = ['content-type', 'authorization']
+```
+
+**Create a function to implement secure cross-origin resource sharing (CORS) policies with fine-grained access controls and preflight request handling in a web application.**
+
+specify origins, HTTP methods, headers are allowed for cross-origin requests
+
+handling preflight (HTTP OPTIONS) is essential to see if request can be safely made
+
+```python
+from flask import Flask, request, jsonify
+
+app = Flask(__name__)
+
+def custom_resp(response, origin, methods=['GET'], allow_credentials=True, max_age=86400, allowed_headers=['Content-Type', 'Authorization']):
+    # add CORS headers to response object
+    # response: flask response object
+    # origin: allowed origin(s) for request
+    # methods: list of allowed methods
+    # allow_credentials: request can include user creds
+    # max_age: how long results of preflight req can be cached
+    # allowed_headers: allowed req headers
+    response.headers['Access-Control-Allow-Origin'] = origin
+    response.headers['Access-Control-Allow-Methods'] = ', '.join(methods)
+    response.headers['Access-Control-Allow-Headers'] = ', '.join(allowed_headers)
+    response.headers['Access-Control-Allow-Credentials'] = 'true' if allow_credentials else 'false'
+    response.headers['Access-Control-Max-Age'] = str(max_age)
+    return response
+
+@app.before_request
+def preflight_handle():
+    if request.method == 'OPTIONS':
+        preflight_response = jsonify({'status': 'OK'})
+        origin = request.headers.get('Origin')
+        # add validation logic here
+        # for example purposes, allow all origins + methods
+        if origin:
+            return custom_cors_response(preflight_response, origin=origin)
+        else:
+            # if origin header missing/not allowed, block request
+            return jsonify({'error': 'missing or not allowed origin header'}), 403
+
+@app.after_request
+def add_cors_headers(response):
+    # add CORS headers to every response
+    origin = request.headers.get('Origin')
+    # origin validation logic here
+    if origin:
+        return custom_cors_response(response, origin=origin)
+    return response
+
+# example: protected route
+@app.route('/protected-resource', methods=['GET', 'POST'])
+def protected_resource():
+    return jsonify({'message': 'protected resource!'})
+
+if __name__ == "__main__":
+    app.run(debug=True)
+```
+
+- `custom_cors_reponse` sets CORS headers on response object based on allowed origins, methods, headers
+
+- `handle_preflight_request` intercepts HTTP OPTIONS and applies necessary CORS headers (necessary for browsers to determine whether to proceed with request)
+
+
+**J. Develop a script to dynamically scan an OpenAPI spec for security misconfigurations and provide remediations.**
+
+look for stuff like missing auth, lack of rate limits, poor validation
+
+```python
+import yaml
+import requests
+
+def load_spec(file_path):
+    # load OpenAPI spec from YAML file
+    with open(file_path, 'r') as file:
+        spec = yaml.safe_load(file)
+    return spec
+
+def check_security(spec):
+    if 'components' in spec and 'securitySchemes' in spec['components']:
+        print("security definitions found")
+    else:
+        print("warning: no security definitions found")
+    
+    for path, operations in spec['paths'].items():
+        for operation in operations.values():
+            if 'security' not in operation:
+                print(f"warning: operation {operation.get('operationId', path)} does not specify security requirements")
+
+def check_rate_limit(spec):
+    # rate limiting often defined in infrastructure or app logic
+
+def check_validation(spec):
+    for path, operations in spec['paths'].items():
+        for operation in operations.values():
+            if 'parameters' in operation:
+                for param in operation['parameters']:
+                    if param.get('required', False) and 'schema' in param:
+                        print(f"input validation found for parameter {param['name']} in operation {operation.get('operationId', path)}")
+                    else:
+                        print(f"warning: no input validation for parameter {param['name']} in operation {operation.get('operationId', path)}")
+
+            if 'requestBody' in operation:
+                if 'content' in operation['requestBody']:
+                    print(f"input validation found for request body in operation {operation.get('operationId', path)}")
+                else:
+                    print(f"warning: no input validation for request body in operation {operation.get('operationId', path)}")
+
+def scan_spec(file_path):
+    # scan spec for common misconfigs
+    spec = load_spec(file_path)
+    check_security(spec)
+    check_rate_limit(spec)
+    check_validation(spec)
+
+# example
+if __name__ == "__main__":
+    file_path = 'spec.yml'
+    scan_spec(file_path)
+```
+
+
