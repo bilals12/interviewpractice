@@ -1,3 +1,4 @@
+
 **1. implement a function to sanitize user input to prevent XSS in a web application.**
 
 ```python
