@@ -98,9 +98,28 @@ def login():
     access_token = create_access_token(identity=username)
     return jsonify({access_token=access_token})
 
+@app.route('/protected', methods=['GET'])
+@jwt_required() # protect route with JWT
+def protected():
+    # access identity of current user with get_jwt_identity
+    current_user = get_jwt_identity()
+    return jsonify(logged_in_as=current_user), 200
 
-
+if __name__ == '__main__':
+    app.run(debug=True)
 ```
+
+- `JWT_SECRET_KEY` used to sign JWT tokens
+
+- `/login` endpoint accepts username:password, validates, returns JWT token
+
+- `/protected` is a protected route that requires a valid JWT token to access. `@jwt_required()` ensures that requests include a valid JWT token in Authorization header
+
+- `create_access_token()` generates JWT token with identity
+
+- send `POST` request to `/login` with JSON body containing username:password
+
+- send `GET` request to `/protected` with JWT token included in Authorization header as `Bearer <token>`
 
 **Develop code to upload a file to a cloud storage API like S3/Cloudinary/Azure Blob Storage by making proper access key based authenticated requests for secure file transfer over TLS.**
 
@@ -285,8 +304,246 @@ async def fetch_data():
 server managed by ASGI server (uvicorn) command line options for SSL
 
 
+**Implement a rate limiting logic for an API endpoint that uses a token bucket algorithm to allow only a certain number of requests per minute from an API consumer. The code should check the token count before processing request and return 429 Too Many Requests response if rate limit exceeds.**
+
+track number of available tokens for each API consumer, replenish tokens at fixed rate
+if bucket runs out, reqs denied until tokens replenished
+
+```python
+from flask import Flask, jsonify, request
+import time
+
+app = Flask(__name__)
+
+# config rate limiting
+RATE_LIMIT = 5 # 5 reqs per min
+REFILL_TIME = 60 # refill rate (s)
+buckets = {} # dict to keep track of buckets for each consumer
+
+def get_bucket(ip):
+    # get current state of bucket
+    # create new bucket if it doesn't exist
+    if ip not in buckets:
+        # each bucket is a list: [available tokens, last refill timestamp]
+        buckets[ip]: [RATE_LIMIT, time.time()]
+    return buckets[ip]
+
+def refill_tokens(bucket):
+    # refill bucket based on elapsed time since last refill
+    now = time.time()
+    elapsed = now - bucket[1] # time since last refill
+    # calculate how many tokens to add
+    tokens_add = (elapsed // REFILL_TIME) * RATE_LIMIT
+    if tokens_add > 0:
+        bucket[0] = min(bucket[0] + tokens_add, RATE_LIMIT) # don't exceed RATE_LIMIT
+        bucket[1] = now
+
+@app.route('/api/resource')
+def protected_resource():
+    client_ip = request.remote_addr # use client IP as API consumer ID
+    bucket = get_bucket(client_ip)
+    # refill bucket based on elapsed
+    refill_tokens(bucket)
+    if bucket[0] > 0:
+        bucket[0] -= 1 # consume 1 token
+        return jsonify({'message': 'request successful'}), 200
+    else:
+        # no tokens available (rate limit exceeded)
+        return jsonify({'error': 'too many requests'}), 429
+
+if __name__ == '__main__':
+    app.run(debug=True)
+```
+
+- `RATE_LIMIT` defines max number of reqs allowed per minute (per consumer)
+
+- `REFILL_TIME` defines how often tokens are replenished
+
+- `buckets` dict tracks token buckets for each consumer, id'd by IP address. each bucket contains number of available tokens, and timestamp of last refill
+
+- per req, script checks if there are available tokens in the bucket. if tokens are available, it takes 1 token and allows req. otherwise: 429
+
+- `refill_tokens` calculates number of tokens to add based on elapsed time. makes sure bucket's token count does not exceed rate limit
+
+- irl, using API keys or some other form of authentication besides IP address
+
+- use Redis for prod environments (manage rate limiting across multiple server instances)
+
+**Write code to call an API that requires OAuth 2.0 authentication. The script should implement authorization code grant type flow - make a token endpoint call to get access token by passing client ID, secret and then use the access token to call the API.**
+
+redirect user to authorization server
+get authorization code
+exchange code for token
+
+```python
+from flask import Flask, request, redirect
+import requests
+
+app = Flask(__name__)
+
+client_id = 'client_id'
+client_secret = 'client_secret'
+redirect_uri = 'http://localhost:5000/callback'
+authorization_url = 'https://authorization-server.com/auth'
+token_url = 'https://authorization-server.com/token'
+scope = 'read'
+
+@app.route('/login')
+def login():
+    auth_url = f"{authorization_url}?response_type=code?client_id={client_id}&redirect_uri={redirect_uri}&scope={scope}"
+    return redirect{auth_url}
+
+@app.route('/callback')
+def callback():
+    code = request.args.get('code')
+    access_token = get_access_token(code)
+    # use access_token to call API
+    return 'API call response'
+
+def get_access_token(code):
+    payload = {
+        'grant_type': 'authorization_code',
+        'client_id': client_id,
+        'client_secret': client_secret,
+        'code': code,
+        'redirect_uri': redirect_uri
+    }
+    response = requests.post(token_url, data=payload)
+    response_data = response.json()
+    return response_data['access_token']
+
+if __name__ == '__main__':
+    app.run(debug=True)
+```
+
+- `/login` route constructs authorization URL and redirects user to it
+
+- 
+
+**Create an API endpoint that fetches data from a database and returns response in JSON format. The code should sanitize any user input parameters before using them in database queries to prevent SQL injection attacks.**
+
+assume we create an app: `app.py`
+assume we have a SQLite db named `example.db`: table `users` with cols `id`, `name`, `email`
+
+```python
+from flask import Flask, request, jsonify, g
+import sqlite3
+
+DATABASE = 'example.db'
+app = Flask(__name__)
+
+def get_db():
+    db = getattr(g, '_database', None)
+    if db is None:
+        db = g._database = sqlite3.connect(DATABASE)
+    return db
+
+@app.teardown_appcontext
+def close_conn(exception):
+    # close db connection automatically when app context ends
+    db = getattr(g, '_database', None)
+    if db is not None:
+        db.close()
+
+def query_db(query, args=(), one=False):
+    # execute queries with params
+    # uses parametrized queries (query, args) to prevent SQLi by separating query structure from data
+    cur = get_db().execute(query, args)
+    rv = cur.fetchall()
+    cur.close()
+    return (rv[0] if rv else None) if one else rv
+
+def sanitize_input(user_input):
+    # basic implementation: remove non-alphanumeric chars from input
+    # use 'bleach' for more complex data
+    return ''.join(e for e in user_input if e.isalnum())
+
+@app.route('/api/users', methods=['GET'])
+# accepts 'id' param, sanitizes it, uses it in parametrized query to fetch user data
+def get_users():
+    user_id = request.args.get('id', '')
+    user_id = sanitize_input(user_id) # sanitize input
+    if user_id:
+        # using parametrized queries
+        user = query_db('select * from users where id = ?', [user_id], one=True)
+    else:
+        user = query_db('select * from users')
+    return jsonify(user)
+
+if __name__ == '__main__':
+    app.run(debug=True)
+```
+
+executing script: `python app.py`
+
+access API endpoint: `https://127.0.0.1:5000/api/users?id=1`
 
 
+**Develop a script to upload a file to an API endpoint that accepts multipart encoded file data. The code should check the uploaded file content type, size as per application logic requirements, scan contents for viruses/malware before storing on the server to prevent file based attacks.**
+
+```python
+from flask import Flask, request, jsonify
+import magic
+import os
+
+app = Flask(__name__)
+
+upload_folder = '/path/to/directory'
+allowed_extensions = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
+max_file_size = 1024 * 1024 * 10 #10MB
+
+app.config['UPLOAD_FOLDER'] = upload_folder
+
+def allowed_file(filename):
+    # check if file extension allowed
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in allowed_extensions
+
+def check_file(file_stream):
+    # check file content type
+    mime = magic.Magic(mime=True)
+    file_mime_type = mime.from_buffer(file_stream.read(1024))
+    file_stream.seek(0) # reset file stream position
+    return file_mime_type in ['text/plain', 'application/pdf', 'image/png', 'image/jpeg', 'image/gif']
+
+def scan_file(file_path):
+    # scans file for virus/malware
+    # this should be replaced with an actual scan implementation
+    return True # if file is clean
+
+@app.route('/upload', methods=['POST'])
+def upload_file():
+    if 'file' not in request.files:
+        return jsonify({'error': 'no file part'}), 400
+    file = request.files['file']
+
+    if file.filename == '':
+        return jsonify({'error': 'no selected file'}), 400
+
+    if file and allowed_file(file.filename):
+        if file.mimetype not in allowed_extensions:
+            return jsonify({'error': 'file type not allowed'}), 400
+        if file.content_length > max_file_size:
+            return jsonify({'error': 'file size exceeds limit'}), 400
+        if not check_file(file.stream):
+            return jsonify({'error': 'file content does not match type'}), 400
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
+        file.save(filepath)
+
+        if not scan_file(filepath):
+            os.remove(filepath) # remove file if it's flagged
+            return jsonify({'error': 'file infected'}), 403
+        
+        return jsonify({'message': 'file upload successful'}), 200
+    
+    return jsonify({'error': 'file type not allowed'}), 400
+
+if __name__ == '__main__':
+    app.rub(debug=True)
+```
+
+- can use ClamAV tool
+
+- or use some of the following methods: checksums, 
 
 
 # some more complicated questions
