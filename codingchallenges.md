@@ -1,3 +1,5 @@
+# general AppSec Engineering coding exercises
+
 
 **1. implement a function to sanitize user input to prevent XSS in a web application.**
 
@@ -1190,11 +1192,135 @@ if __name__ = "__main__":
 
 **25. Write code to implement a secure sandbox environment for executing untrusted code snippets while preventing code injection and privilege escalation.**
 
+use `subprocess` to exec untrusted code in a separate process with restricted privs
+irl: use isolated containers or VMs
+
+```python
+import subprocess
+import os
+
+def run_untrusted(code_snippet, timeout=5):
+    # exec code snippet in separate process
+    # code_snippet: string containing the code
+    # timeout: max exec time (s)
+
+    # path to temp file to store code
+    code_file = "/tmp/untrusted.py"
+
+    # write code to temp file
+    with open(code_file, "w") as f:
+        f.write(code_snippet)
+
+    # define command to run python code in restricted env
+    # "nobody" user (drop privs)
+    command = ["sudo", "-u", "nobody", "python3", code_file]
+
+    try:
+        # exec command with time limit
+        result = subprocess.run(command, capture_output=True, text=True, timeout=timepout)
+        return result.stdout, result.stderr
+    except subprocess.TimeoutExpired:
+        return "", "execution timed out!"
+    finally:
+        # cleanup: remove temp file
+        os.remove(code_file)
+
+# example
+if __name__ == "__main__":
+    code_snippet = """
+    print("hello, sandbox!")
+    """
+    stdout, stderr = run_untrusted(code_snippet)
+    print("STDOUT:", stdout)
+    print("STDERR:", stderr)
+```
+
 **26. Create a script to perform runtime memory analysis and exploit detection to identify and prevent buffer overflow vulnerabilities in a C/C++ application.**
 
 **27. Develop a function to implement dynamic taint analysis for tracking user-controlled input flow through the application's data flow paths to prevent data leakage.**
 
+
+
 **28. Design a secure logging mechanism that includes log integrity verification, log encryption, and tamper-evident logging to ensure data confidentiality and integrity.**
+
+encrypt logs (AES-256)
+
+```python
+from Crypto.Cipher import AES
+from Crypto.Random import get_random_bytes
+import base64
+import hashlib
+import os
+
+# secure encryption key
+def gen_key(password: str, salt=os.urandom(16)):
+    key = hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'), salt, 100000)
+    return key, salt
+
+# encrypt
+def encrypt_message(message: str, key):
+    cipher = AES.new(key, AES.MODE_GCM)
+    ciphertext, tag = cipher.encrypt_and_digest(message.encode('utf-8'))
+    return base64.b64encode(cipher.nonce + tag + ciphertext).decode('utf-8')
+
+# decrypt
+def decrypt_message(encrypted_message: str, key):
+    b64 = base64.b64decode(encrypted_message.encode('utf-8'))
+    nonce, tag, ciphertext = b64[:16], b64[16:32], b64[32:]
+    cipher = AES.new(key, AES.MODE_GCM, nonce=nonce)
+    plaintext = cipher.decrypt_and_verify(ciphertext, tag)
+    return plaintext.decode('utf-8')
+```
+
+log integrity verification + tamper-evident logging
+compute secure hash for each log entry (incorporate content of log and hash of previous log entry)
+append new log entry with hash to a log file
+this is a simple demo of a blockchain like structure
+
+```python
+import hashlib
+import json
+import os
+
+LOG_FILE_PATH = 'secure_log.json'
+
+def get_last_hash():
+    # hash of last log entry from file
+    try:
+        with open(LOG_FILE_PATH, 'r') as log_file:
+            # go to last line of file to get latest entry
+            for line in reversed(list(log_file)):
+                last_log = json.loads(line)
+                return last_log['hash']
+    except (FileNotFoundError, JSONDecodeError, KeyError):
+        # if file not found or empty, start with no prev hash
+        return ''
+
+def hash_log_entry(entry: str, previous_hash: str) -> str:
+    # generate sha-256 hash of log entry + previous log's hash
+    hasher = hashlib.sha256()
+    hasher.update(f'{entry}{previous_hash}'.encode('utf-8'))
+    return hasher.hexdigest()
+
+def append_log(entry: str):
+    # append new log entry to file, including hash of prev entry
+    previous_hash = get_last_hash()
+    new_hash = hash_log_entry(entry, previous_hash)
+    log_entry = {
+        'log': entry,
+        'hash': new_hash
+    }
+
+    # append
+    with open(LOG_FILE_PATH, 'a') as log_file:
+        log_file.write(json.dumps(log_entry) + '\n')
+
+# example
+if __name__ == "__main__":
+    append_log("user login attempt successful")
+    append_log("user accessed confidential document")
+```
+
 
 **29. Write code to implement a secure key management system using Hardware Security Modules (HSMs) for storing and protecting cryptographic keys.**
 
@@ -1724,6 +1850,51 @@ public class SafeDeserialization {
 
 
 **41. Develop a script to perform static code analysis on source code files to identify security vulnerabilities such as buffer overflows, injection flaws, and insecure cryptographic practices.**
+
+scan source code files based on pattern matching
+irl tools: SonarQube, Fortify, Brakeman (Ruby on Rails), Bandit (Python)
+
+using basic pattern matching to identify insecure crypto (weak hashing):
+
+```python
+import re
+import os
+
+# define patterns
+patterns = {
+    'md5': re.compile(r'\bmd5\b'),
+    'sha1': re.compile(r'\bsha1\b'),
+}
+
+# list of files/dirs to exclude
+excludes = ['venv', 'node_modules', '.git']
+
+def is_excluded(path):
+    for exclude in excludes:
+        if exclude in path:
+            return True
+    return False
+
+def scan_file(file_path):
+    with open(file_path, 'r', encoding='utf-8', errors='ignore') as file:
+        content = file.read()
+        for key, pattern in patterns.items():
+            if pattern.search(content):
+                print(f"insecure usage of {key.upper()} found in {file_path}")
+
+def scan_directory(directory):
+    for root, dirs, files in os.walk(directory):
+        # filter out excluded
+        dirs[:] = [d for d in dirs if not is_excluded(d)]
+        for file in files:
+            if file.endswith(('.py', '.js', '.java', '.c', '.cpp')):
+                scan_file(os.path.join(root, file))
+
+if __name__ == "__main__":
+    directory_to_scan = '.' # current dir
+    scan_directory(directory_to_scan)
+```
+
 
 **42. Create a function to implement secure cross-origin resource sharing (CORS) policies with fine-grained access controls and preflight request handling in a web application.**
 

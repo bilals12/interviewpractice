@@ -1,3 +1,60 @@
+# API Security coding challenges
+
+# important
+
+## storing creds as env variables
+
+### linux/macOS
+
+temporary (current terminal session):
+
+```bash
+export VARIABLE_NAME='value'
+```
+
+permanent:
+
+```bash
+nano ~/.bash_profile
+nano ~/.bashrc
+nano ~/.zshrc
+```
+
+add following line at the end of the file:
+
+```bash
+export VARIABLE_NAME='value'
+```
+
+restart terminal or source profile file:
+
+```bash
+source ~/.bash_profile
+source ~/.bashrc
+source ~/.zshrc
+```
+
+### windows
+
+temporary:
+
+```cmd
+set VARIABLE_NAME=value
+```
+
+permanent:
+
+edit system environment variables
+under "user variables" or "system variables" click "new"
+enter the name of variable and value, click OK
+
+## calling env variables in python
+
+```python
+import os
+VARIABLE_NAME = os.getenv('VARIABLE_NAME')
+```
+
 # some basic questions
 
 **Implement a simple API endpoint in Flask/Django that requires an API key validation before responding. The candidate should check for the presence of the API key in headers or parameters, validate it against pre-shared values in code/db, return 401 unauthorized response if invalid key.**
@@ -303,6 +360,53 @@ async def fetch_data():
 
 server managed by ASGI server (uvicorn) command line options for SSL
 
+## without flask/FastAPI
+
+1. generate cert using OpenSSL
+
+2. server.py
+
+```python
+from http.server import HTTPServer, BaseHTTPRequestHandler
+import ssl
+
+class SimpleHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.end_headers()
+        self.wfile.write(b'hello!!!!')
+
+def run(server_class=HTTPServer, handler_class=SimpleHandler, port=4443):
+    server_address = ('', port)
+    httpd = server_class(server_address, handler_class)
+    httpd.socket = ssl.wrap_socket(httpd.socket, server_side=True, certfile='server.crt', keyfile='server.key', ssl_version=ssl.PROTOCOL_TLS, ca_certs='ca.crt', cert_reqs=ssl.CERT_REQUIRED)
+    print(f'starting httpd on port {port}')
+    httpd.serve_forever()
+
+if __name__ == '__main__':
+    run()
+```
+
+3. client.py
+
+```python
+import http.client
+import ssl
+
+def make_request(host='localhost', port=4443):
+    context = ssl.create_default_context(ssl.Purpose.SERVER_AUTH, cafile='ca.crt')
+    context.load_cert_chain(certfile='client.crt', keyfile='client.key')
+
+    connection = http.client.HTTPSConnection(host, port, context=context)
+    connection.request('GET', '/')
+    response = connection.getresponse()
+    print(f'status: {response.status}, reason: {response.reason}')
+    data = response.read()
+    print(data.decode())
+
+if __name__ == '__main__':
+    make_request
+```
 
 **Implement a rate limiting logic for an API endpoint that uses a token bucket algorithm to allow only a certain number of requests per minute from an API consumer. The code should check the token count before processing request and return 429 Too Many Requests response if rate limit exceeds.**
 
@@ -369,6 +473,77 @@ if __name__ == '__main__':
 
 - use Redis for prod environments (manage rate limiting across multiple server instances)
 
+### without flask:
+
+define token bucket rate limiter
+
+```python
+import time
+
+class TokenBucket:
+    def __init__(self, tokens, fill_rate):
+        self.capacity = tokens
+        self._tokens = tokens
+        self.fill_rate = fill_rate
+        self.timestamp = time.time()
+    
+    def consume(self, tokens=1):
+        # consume tokens from bucket
+        now = time.time()
+        elapsed = now - self.timestamp
+        self._tokens += elapsed * self.fill_rate
+        self.timestamp = now
+
+        # bucket should not exceed cap
+        if self._tokens > self.capacity:
+            self._tokens = self.capacity
+
+        # consume only if there are enough
+        if self._tokens >= tokens:
+            self._tokens -= tokens
+            return True
+        return False
+```
+
+server with rate limiting:
+
+```python
+from http.server import BaseHTTPRequestHandler, HTTPServer
+import threading
+
+# init global rate limiter
+# 5 tokens + refill 5 tokens per min (5/60 per s)
+rate_limiter = TokenBucket(tokens=5, fill_rate=5/60)
+
+class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        # check if req is allowed by rate limiter
+        if not rate_limiter.consume():
+            self.send_response(429, "too many reqs")
+            self.end_headers()
+            self.wfile.write(b"rate limit exceeded. try again later!")
+            return
+        
+        # handle allow
+        self.send_response(200)
+        self.end_headers()
+        self.wfile.write(b"hello!")
+
+def run(server_class=HTTPServer, handler_class=SimpleHTTPRequestHandler, port=8000):
+    server_address = ('', port)
+    httpd = server_class(server_address, handler_class)
+    print(f"starting httpd on port {port}")
+    httpd.serve_forever()
+
+if __name__ == '__main__':
+    # run server in separate thread (concurrency)
+    server_thread = threading.Thread(target=run)
+    server_thread.daemon = True
+    server_thread.start()
+
+    input("press enter to stop server\n")
+```
+
 **Write code to call an API that requires OAuth 2.0 authentication. The script should implement authorization code grant type flow - make a token endpoint call to get access token by passing client ID, secret and then use the access token to call the API.**
 
 redirect user to authorization server
@@ -414,6 +589,56 @@ def get_access_token(code):
 
 if __name__ == '__main__':
     app.run(debug=True)
+```
+
+### without flask:
+
+```python
+import requests
+# if storing creds as env variables:
+# import os
+
+# OAuth2.0 endpoint
+token_url = 'https://authorization-server.com/oauth/token'
+api_url = 'https://api.example.com/data'
+
+# client creds (obtain from OAuth provider)
+client_id = 'client_id'
+client_secret = 'client_secret'
+# if storing creds as env variables:
+# client_id = os.getenv('CLIENT_ID')
+# client_secret = os.getenv('CLIENT_SECRET')
+
+# get access token
+def get_token(client_id, client_secret):
+    payload = {
+        'grant_type': 'client_credentials',
+        'client_id': client_id,
+        'client_secret': client_secret
+    }
+    response = requests.post(token_url, data=payload)
+    # check for valid resp
+    if response.status_code == 200:
+        return response.json()['access_token']
+    else:
+        raise Exception("failed to obtain access token")
+
+# call API with access token (authenticated req)
+def call_api(access_token):
+    headers = {'Authorization': f'Bearer {access_token}'}
+    response = requests.get(api_url, headers=headers)
+    return response.json()
+
+# example
+try:
+    # if calling creds from env variables:
+    # if not client_id or not client_secret:
+        # raise Exception("Client ID or Client Secret not set in environment variables")
+    access_token = get_token(client_id, client_secret)
+    api_response = call_api(access_token)
+    print(api_response)
+except Exception as e:
+    print(f"error: {e}")
 ```
 
 - `/login` route constructs authorization URL and redirects user to it
