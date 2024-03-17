@@ -1321,8 +1321,8 @@ if __name__ == "__main__":
     append_log("user accessed confidential document")
 ```
 
-
 **29. Write code to implement a secure key management system using Hardware Security Modules (HSMs) for storing and protecting cryptographic keys.**
+
 
 **30. Develop a script to perform automated security fuzz testing on API endpoints with mutation-based fuzzing techniques to uncover hidden vulnerabilities.**
 
@@ -1981,7 +1981,538 @@ else:
     print("aborting!")
 ```
 
+**46. Implement a script to scan a web application firewall (WAF) ruleset to identify gaps in coverage for threats like SQLi, XSS, RCE, etc. and provide additional rule recommendations.**
 
+analyzing rules to check for patterns/strategies
+parse WAF config and ruleset filters
+
+scan simplified ruleset file, identify coverage for common threats, suggest missing rules
+
+```python
+import re
+
+# example rules
+ruleset = """
+deny from 192.168.1.1
+allow from all
+detect sql-injection pattern "SELECT * FROM"
+detect xss pattern "<script>"
+"""
+
+# threats to check in WAF ruleset
+threats = {
+    "SQL injection": {
+        "detected": False,
+        "patterns": ["sql-injection", "UNION SELECT", "SELECT * FROM"],
+        "recommendation": 'add rule to detect common SQLi payloads'
+    },
+    "XSS": {
+        "detected": False,
+        "patterns": ["xss", "<script>", "javascript:"],
+        "recommendation": 'add rule to detect common XSS payloads'
+    },
+    "RCE": {
+        "detected": False,
+        "patterns": ["exec(", "eval(", "bash -i"],
+        "recommendation": 'add rule to detect common RCE payloads'
+    }
+}
+
+def scan_ruleset(ruleset, threats):
+    for line in ruleset.split('\n'):
+        for threat, info in threats.items():
+            for pattern in info["patterns"]:
+                if re.search(patten, line, re.IGNORECASE):
+                    info["detected"] = True
+                    break
+
+def report_findings(threats):
+    print("WAF coverage:")
+    for threat, info in threats.items():
+        if info["detected"]:
+            print(f"[OK] {threat} detection rule found")
+        else:
+            print(f"[MISSING] {threat} detection rule not found. recommendation: {info['recommendation']}")
+
+# scan ruleset for each threat
+scan_ruleset(ruleset, threats)
+
+# report findings + recommendations
+report_findings(threats)
+```
+
+**Develop a function to decrypt HTTPS traffic sent to and from a mobile application using certificate pinning bypass techniques without access to source code or backend servers.**
+
+**Create an authentication mechanism for a JSON REST API using HMAC signed JSON Web Tokens following OWASP security guidelines and best practices.**
+
+**Write code to identify authorization vulnerabilities like horizontal/vertical privilege escalation, business logic issues in a complex user roles and permissions scheme for a financial application.**
+
+**Build an input validation library that sanitizes and encodes user input to prevent OWASP Top 10 injection threats like OS command, LDAP, XPath injections in Java/Python web apps and APIs.**
+
+**Design a secure cryptographic module for handling sensitive data like passwords, keys using FIPS 140-2 compliant encryption schemes with technology like HSMs.**
+
+**Create scripts to exploit authentication vulnerabilities like credential stuffing, brute force attacks, 2FA bypass on a test financial application with valid bug bounty scope and documentation.**
+
+**Develop an application layer DDoS attack simulator to stress test and analyze the defense mechanisms of CDNs, WAFs, load balancers against HTTP floods, slow attacks etc.**
+
+**Implement a Python tool for fuzz testing APIs that detects edge cases leading to failures like crashes, errors, timeouts using both valid and invalid data combinations.**
+
+need to generate wide range of input data (valid + invalid)
+edge cases: crashes, errors, timeouts
+
+```python
+import requests
+import random
+import string
+
+# target API (endpoint)
+API_ENDPOINT = 'https://example.com/api/v1/resource'
+
+# headers (if required for authentication)
+HEADERS = {
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer ACCESS_TOKEN'
+}
+
+# generate random strings for fuzzing
+def random_string(length=10):
+    return ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(length))
+
+# generate set of test cases (invalid + valid)
+def gen_test_cases():
+    return [
+        {"data": random_string(10)},
+        {"data": random_string(5000)},
+        {"data": ""},
+        {"data": "\x00"},
+        {"data": "SELECT * FROM users"},
+        # more test cases here
+    ]
+
+# send reqs to API with each test case
+def fuzz_test(endpoint, headers=None):
+    test_cases = gen_test_cases()
+
+    for i, case in enumerate(test_cases, start=1):
+        try:
+            response = requests.post(endpoint, json=case, headers=headers, timeout=5)
+            # check for various failure modes
+            if response.status_code != 200:
+                print(f"test case {i}: detected potential issue with status code {response.status_code}, payload: {case}")
+            else:
+                print(f"test case {i}: passed with status code 200")
+        except requests.exceptions.Timeout:
+            print(f"test case {i}: timeout occurred, payload: {case}")
+        except requests.exceptions.RequestException as e:
+            print{f"test case {i}: request exception: {e}, payload: {case}"}
+
+if __name__ == "__main__":
+    fuzz_test(API_ENDPOINT, HEADERS)
+```
+
+**Configure a CI/CD pipeline securely by integrating SAST, DAST, SCA tools to enable automated vulnerability detection for applications with every code change.**
+
+SAST: SonarQube, Checkmarx, Fortify (analyze src for vulns)
+DAST: OWASP ZAP, Burp Suite (perform runtime testing on deployed apps)
+SCA: Snyk, WhiteSource, OWASP Dependency-Check (ID known vulns in 3rd party dependencies)
+
+setting up CI/CD pipeline:
+- install jenkins
+- install necessary plugins: version control (Git), build tools (Maven, Gradle), specific integration plugins
+
+integrate SAST tools:
+- eg: SonarQube
+- config SonarQube as global tool
+- add SonarQube to pipeline: use SonarQube Scanner to analyze codebase during builds
+- configure `Jenkinsfile` to include stage for SonarQube analysis
+
+```groovy
+stage('SAST - SonarQube') {
+    steps {
+        script {
+            withSonarQubeEnv('yourSonarQubeEnvironment') {
+                sh 'sonar-scanner'
+            }
+        }
+    }
+}
+```
+
+integrate DAST tools:
+- OWASP ZAP: run ZAP in daemon mode in an env that can reach deployed app
+- add stage in `Jenkinsfile` to perform DAST using ZAP
+
+```groovy
+stage('DAST - OWASP ZAP') {
+    steps {
+        script {
+            sh 'zap-cli quick-scan --self-contained --start-options "-config api.disablekey=true" yourAppURL'
+        }
+    }
+}
+```
+
+integrate SCA tools:
+- install Snyk CLI
+- include stage for Snyk to scan for vulnerable dependencies
+
+```groovy
+stage('SCA - Snyk') {
+    steps {
+        script {
+            sh 'snyk test --all-projects'
+        }
+    }
+}
+```
+
+automate issue creation, notifs, etc.
+
+store creds (like API keys) securely using Credentials Plugins
+
+define pipeline config as code (`Jenkinsfile`) and stor in version control with proper access controls
+
+keep updated
+
+# cryptography
+
+Implement a cryptographic hash function from scratch using a hash algorithm like SHA256. Define chunking, compression and hashing mechanisms per RFC spec.
+
+1. preprocessing
+
+- padding: input message is padded so its length is 448 mod 512. padding consists of single '1' bit followed by enough '0' bits and finishes with 64-bit representation of original message length
+
+- parsing: padded message divided into N 512-bit blocks
+
+2. setting initial hash values
+
+- SHA-256 defines 8 initial hash values (h0 - h7). these are the first 32 bits of the fractional parts of the square roots of the first 8 prime numbers
+
+3. compression
+
+- each 512-bit block is processed in a compression function that updates hash values based on block's data
+
+4. producing final hash
+
+- final hash is produced by concatenating the 8 hash values (h0 - h7)
+
+simplified example (not full SHA-256):
+
+```python
+def simple_sha(message):
+    # convert message to binary + pad it
+    message_bin = ''.join(format(ord(c), '08b') for c in message)
+    padded_mess = message_bin + '1' + '0' * (447 - len(message_bin) % 512) + format(len(message_bin), '064b')
+
+    # initial hash values (irl they are derived from square roots of first 8 primes)
+    h = [1779033703, 3144134277, 1013904242, 2773480762, 1359893119, 2600822924, 528734635, 1541459225]
+
+    # simplified compression function
+    def compress(block, hash_values):
+        return [(hv + int(block, 2)) % 2**32 for hv in hash_values]
+
+    # process each 512-bit block
+    for i in range(0, len(padded_mess), 512):
+        block = padded_mess[i:i+512]
+        h = compress(block, h)
+
+    # concatenate final hash values
+    return ''.join(format(x, '032b') for x in h)
+
+# example
+if __name__ == "__main__":
+    message = "hello!"
+    hash_output = simple_sha(message)
+    print(f"'{message}': {hash_output}")
+```
+
+
+
+Create an AES encrypt/decrypt functionality for a password manager chrome extension using 256 bit keys in Galois Counter Mode following crypto best practices.
+
+in python:
+
+```python
+from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+import os
+
+def aes_gcm_encrypt(data, key):
+    # encrypt using AES-256 GCM
+    # data(bytes): plaintext
+    # key(bytes): encryption key (32 bytes)
+    # returns a dict containing encrypted data + nonce
+    aesgcm = AESGCM(key)
+    nonce = os.urandom(12) # standard GCM nonce size
+    encrypted_data = aesgcm.encrypt(nonce, data, None)
+    return = {
+        'encrypted_data': encrypted_data,
+        'nonce': nonce,
+    }
+
+def aes_gcm_decrypt(encrypted_data, nonce, key):
+    # encrypted_data(bytes): encrypted data
+    # nonce(bytes): nonce used during encryption
+    # key(bytes): decryption key (32 bytes)
+    aesgcm = AESGCM(key)
+    return aesgcm.decrypt(nonce, encrypted_data, None)
+
+# example
+if __name__ == "__main__":
+    # random keygen
+    key = AESGCM.generate_key(bit_length=256)
+
+    # data to encrypt
+    data = b"secret!!!"
+
+    # encrypt
+    encryption_result = aes_gcm_encrypt(data, key)
+
+    # decrypt
+    decrypted_data = aes_gcm_decrypt(encryption_result['encrypted_data'], encryption_result['nonce'], key)
+```
+
+using Web Crypto API in javascript provides crypto operations in web apps
+
+keygen
+
+```js
+async function generateKey() {
+    try {
+        const key = await window.crypto.subtle.generateKey(
+            {
+                name: "AES-GCM",
+                length: 256, // can be 128, 192, 256
+            },
+            true, // is key extractable? (can it be used in exportKey?)
+            ["encrypt", "decrypt"] // must for AES-GCM
+        );
+        return key;
+    } catch (err) {
+        console.error(err);
+    }
+}
+```
+
+to encrypt: generated key + data (plaintext) + init vector (IV)
+IV is unique for every encryption (but does not need to be secret)
+
+```js
+async function encryptData(plainText, key) {
+    const iv = window.crypto.getRandomValues(new Uint8Array(12)); // AES-GCM needs 12-byte IV
+    try {
+        const encrypted = await window.crypto.subtle.encrypt(
+            {
+                name: "AES-GCM",
+                iv: iv,
+            },
+            key,
+            new TextEncoder().encode(plainText) // convert plaintext to ArrayBuffer
+        );
+        return { iv, encrypted}; // return IV and encrypted data
+    } catch (err) {
+        console.error(err);
+    }
+}
+```
+
+decryption: extract IV from first 12 bytes of encrypted data
+
+```js
+async function decryptData(encryptedData, key, iv) {
+    try {
+        const decrypted = await window.crypto.subtle.decrypt(
+            {
+                name: "AES-GCM",
+                iv: iv,
+            },
+            key,
+            encryptedData
+        );
+        return new TextDecoder().decode(decrypted);
+    } catch (err) {
+        console.error(err);
+    }
+}
+```
+
+example
+
+```js
+(async () => {
+    const key = await generateKey();
+    const dataToEncrypt = "secret!!!";
+
+    const { iv, encrypted } = await encryptData(dataToEncrypt, key);
+
+    const decryptedData = await decryptData(encrypted, key, iv);
+
+    console.log(`original: ${dataToEncrypt}`);
+    console.log(`decrypted: ${decryptedData}`);
+})();
+```
+
+use `chrome.storage.local` with limited access perms
+
+never reuse an IV
+
+
+
+Develop a script to crack passwords hashed with unsalted MD5 by brute forcing strings and comparing hashed outputs to expose the weak scheme.
+
+Design a key derivation function using PBKDF2 with a high work factor and random salt to strengthen password storage in a database.
+
+```python
+import hashlib
+import os
+import binascii
+
+def gen_salt(length=16):
+    # random salt
+    return os.urandom(length)
+
+def hash_pass(password, salt, iterations=100000):
+    # hash using PBKDF2 + HMAC-SHA256
+    # iterations = work factor
+    # convert password to bytes if str
+    if isinstance(password, str):
+        password = password.encode('utf-8')
+
+    # derive key
+    dk = hashlib.pbkdf2_hmac('sha256', password, salt, iterations)
+
+    # return derived key as hex string
+    return binascii.hexlify(dk).decode('ascii')
+
+def verify_pass(stored_pass, provided_pass, salt, iterations=100000):
+    # verify provided password against stored hashed password
+    provided_hash = hash_pass(provided_pass, salt, iterations)
+    return stored_pass == provided_hash
+
+# Example
+if __name__ == "__main__":
+    user_pass = "password123!"
+    salt = gen_salt()
+    # hash
+    hashed_pass = hash_pass(user_pass, salt)
+    print(f"{hashed_pass}")
+    # verify
+    verif_result = verify_pass(hashed_pass, user_pass, salt)
+    print(f"{verif_result}")
+```
+
+Build authentication logic for a TLS channel using client/server certificates signed through a custom CA certificate authority created programmatically.
+
+Write code to find collisions in a weak cryptographic hash function by brute forcing inputs using rainbow tables to demonstrate weakness.
+
+Create a program to share confidential data securely between two applications using hybrid cryptography by leveraging asymmetric and symmetric encryption schemes.
+
+asymmetric for key exchange (RSA)
+symmetric for data encryption (AES)
+
+asymmetric key generation (RSA)
+
+```python
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives.asymmetric import rsa
+
+def gen_rsa_pair():
+    private_key = rsa.generate_private_key(
+        public_exponent = 65537,
+        key_size=2048,
+        backend=default_backend()
+    )
+    public_key = private_key.public_key()
+    return private_key, public_key
+```
+
+symmetric key generation (AES: encrypted with RSA and sent to other app)
+
+```python
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.kdf.pbkdf2 import PMKDF2HMAC
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.asymmetric import padding
+from os import urandom
+
+def gen_aes_key():
+    return urandom(32) # 256-bit key
+```
+
+encrypt symmetric key with recipient's RSA public key
+
+```python
+def encrypt_symmetric_key(aes_key, recipient_public_key):
+    encrypted_key = recipient_public_key.encrypt(
+        aes_key,
+        padding.OAEP(
+            mgf=padding.MGF1(algorithm=hashes.SHA256()),
+            algorithm=hashes.SHA256(),
+            label=None
+        )
+    )
+    return encrypted_key
+```
+
+symmetric encryption of data (AES)
+
+```python
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+
+def encrypt_data_aes(data, aes_key):
+    iv = urandom(16) # AES block size = 16B
+    cipher = Cipher(algorithms.AES(aes_key), modes.CFB(iv), backend=default_backend())
+    encryptor = cipher.encryptor()
+    encrypted_data = encryptor.update(data.encode()) + encryptor.finalize()
+    return iv + encrypted_data # prepend IV for decryption
+```
+
+decrypt symmetric key with RSA
+
+```python
+def decrypt_symmetric_key(encrypted_aes_key, private_key):
+    decrypted_key = private_key.decrypt(
+        encrypted_aes_key,
+        padding.OAEP(
+            mgf=padding.MGF1(algorithm=hashes.SHA256()),
+            algorithm=hashes.SHA256(),
+            label=None
+        )
+    )
+    return decrypted_key
+```
+
+decrypt data with AES
+
+```python
+def decrypt_data_aes(encrypted_data, aes_key):
+    iv = encrypted_data[:16] # extract IV
+    encrypted_data = encrypted_data[16:] # actual encrypted data
+    cipher = Cipher(algorithms.AES(aes_key), modes.CFB(iv), backend=default_backend())
+    decryptor = cipher.decryptor()
+    decrypted_data = decryptor.update(encrypted_data) + decryptor.finalize()
+    return decrypted_data.decode()
+```
+
+example (App A - App B):
+
+```python
+# app A: generata RSA keys + AES key
+private_key_a, public_key_a = gen_rsa_pair()
+aes_key = gen_aes_key()
+
+# app B: generate RSA keys
+private_key_b, public_key_b = gen_rsa_pair()
+
+# app A: encrypt AES key with app B's public RSA key
+encrypted
+```
+
+
+Implement the Diffie-Hellman key exchange protocol to establish shared keys securely between two servers to enable private communication.
+
+Develop a script to retrieve encrypted data from a compromised client application using reverse engineering and runtime manipulation without access to decryption keys.
+
+Design a program to prevent timing side-channel attacks in OpenSSL cryptographic library during signature verification by avoiding early exit on failure.
 
 
 
