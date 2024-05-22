@@ -855,7 +855,7 @@ server {
 }
 ```
 
-challenge 9
+# challenge 9
 
 ```python
 from flask import Flask, render_template, request, redirect, url_for
@@ -953,3 +953,293 @@ if __name__ == '__main__':
 3. set secret key for Flask to securely sign session cookie
 
 4. return unauthorized access message if user profile doesn't exist or username doesn't match
+
+# challenge 10
+
+```js
+const express = require('express');
+const jwt = require('jsonwebtoken');
+require('dotenv').config();
+
+const app = express();
+
+const secretKey = process.env.JWT_SECRET;;
+
+const verifyToken = (req, res, next) => {
+  const token = req.headers.authorization;
+
+  if (!token) {
+    return res.status(401).json({ message: 'No token provided' });
+  }
+
+  const decoded = jwt.decode(token, { complete: true });
+  req.decoded = decoded.payload;
+
+  next();
+};
+
+app.get('/admin', verifyToken, (req, res) => {
+  const { username } = req.decoded;
+  if (username === 'admin') {
+    // admin functionality is now available to the user
+
+    return res.status(200).json({ message: 'Admin access granted' });
+  }
+  res.status(403).json({ message: 'Unauthorized access' });
+});
+
+app.get('/generate-token', (req, res) => {
+  const payload = { username: 'user' };
+  const token = jwt.sign(payload, secretKey, { expiresIn: '1h' });
+  res.status(200).json({ token });
+});
+
+app.listen(3000, () => {
+  console.log('Server running on port 3000');
+});
+```
+
+## vulnerabilities found
+
+1. use of `jwt.decode` instead of `jwt.verify`: `jwt.decode` does not verify token signature (manipulable payload)
+
+2. lack of token expiration handling: `verifyToken` middleware doesn't handle expired tokens (stale tokens)
+
+3. `admin` route checks for hardcoded username
+
+## fixed code
+
+```js
+const express = require('express');
+const jwt = require('jsonwebtoken');
+require('dotenv').config();
+
+const app = express();
+
+const secretKey = process.env.JWT_SECRET;
+
+const verifyToken = (req, res, next) => {
+    const token = req.headers.authorization;
+
+    if (!token) {
+        return res.status(401).json({message: 'no token provided!'});
+    }
+    
+    jwt.verify(token, secretKey, (err, decoded) => {
+        if (err) {
+            return.res.status(401).json({message: 'failed to authenticate token'});
+        }
+        req.user = decoded; // store decoded payload in req.user
+        next();
+    });
+};
+
+const requireRole = (role) => {
+    return (req, res, next) => {
+        if (req.user.role !== role) {
+            return res.status(403).json({message: 'forbidden: insufficient role'});
+        }
+        next();
+    };
+};
+
+app.get('/admin', verifyToken, requireRole('admin'), (req, res) = > {
+    // grant admin functionality to user
+    return res.status(200).json({message: 'admin access granted!'});
+});
+
+app.get('/generate-token', (req, res) => {
+    const payload = {username: 'admin', role: 'admin'}; //include role in payload
+    const token = jwt.sign(payload, secretKey, {expiresIn: '1h'});
+    res.status(200).json({token};)
+});
+
+app.listen(3000, () => {
+    console.log('server running on port 3000');
+});
+
+```
+
+## changes made
+
+1. validate token's integrity and expiration with `jwt.verify`
+
+2. 401 status code if token is invalid/expired
+
+3. RBAC:
+
+- `role` attribute in JWT payload
+
+- `requireRole` checks user's role
+
+- `/generate-token` updated to include `role` in payload
+
+- `/generate-admin-token` endpoint added to generate tokens with `admin` role
+
+# challenge 11
+
+```python
+from flask import Flask
+
+app = Flask(__name__)
+
+@app.route('/admin')
+def admin():
+    return "Admin area accessed!"
+
+@app.route('/')
+def admin():
+    return "Hello World!"
+
+if __name__ == "__main__":
+    app.run(host='0.0.0.0', port=5000)
+```
+
+```nginx
+events {
+    worker_connections 1024; 
+}
+
+http {
+    server {
+        listen 80;
+        server_name example.com;
+
+
+        location = /admin {
+            deny all;
+        }
+
+        location / {
+            proxy_pass http://localhost:5000;
+        }
+
+    }
+}
+```
+
+## vulnerabilities found
+
+1. `admin` function used for both `/admin` and `/` routes, causing a conflict and making `/admin` inaccessible
+
+2. `/admin` route is publicly accessible without any authC/authZ checks
+
+3. hardcoded host + port: set in a conf file
+
+## fixed code
+
+```python
+from flask import Flask, request, jsonify
+import jwt
+import os
+from functools import wraps
+
+app = Flask(__name__)
+secret_key = os.getenv('JWT-SECRET', 'default_secret_key')
+
+# mock db
+users = {
+    'admin': {'password': 'adminpass', 'role': 'admin'},
+    'user': {'password': 'userpass', 'role': 'user'}
+}
+
+def token_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token = request.headers.get('Authorization')
+        if not token:
+            return jsonify({'message': 'token is missing!'}), 401
+        try:
+            data = jwt.decode(token, secret_key, algorithms=["HS256"])
+            request.user = data
+        except Exception as e:
+            return jsonify({'message': 'token is invalid!', 'error': str(e)}), 401
+        return f(*args, **kwargs)
+    return decorated
+
+def require_role(role):
+    def wrapper(f):
+        @wraps(f)
+        def decorated(*args, **kwargs):
+            if request.user['role'] != role:
+                return jsonify({'message': 'access forbidden: insufficient role'}), 403
+            return f(*args, **kwargs)
+        return decorated
+    return wrapper
+
+@app.route('login', methods=['POST'])
+def login():
+    auth = request.authorization
+    if not auth or not auth.username or not auth.password:
+        return jsonify({'message': 'could not verify'}), 401
+    
+    user = users.get(auth.username)
+    if not user or user['password'] != auth.password:
+        return jsonify({'message': 'could not verify'}), 401
+
+    token = jwt.sign({'username': auth.username, 'role': user['role']}, secret_key, algorithm="HS256", expiresIn='1h')
+    return jsonify({'token': token})
+
+@app.route('/admin')
+@token_required
+@require_role('admin')
+def admin_area():
+    return "admin area accessed!"
+
+@app.route('/')
+def home():
+    return "hello world!"
+
+if __name__ == "__main__":
+    app.run(host='127.0.0.1', port=5000)
+```
+
+## changes made
+
+1. renamed second `admin` function to `home`
+
+2. JWT based authC/authZ
+
+3. `token_required` decorator to ensure routes require valid token
+
+3. `require_role` decorator to enforce RBAC
+
+4. `/login` route added
+
+5. moved secret key to env variable with fallback default
+
+6. flask now runs on `127.0.0.1` (prevents direct external access)
+
+## notes on "HS256"
+
+HMAC using SHA-256
+crypto hash function that combines secret key with message to create a unique, fixed-size string of characters (aka hash). used in JWT to ensure integrity + authenticity of the token.
+
+in JWT, payload (data part of token) is encoded and then hashed using secret key and `HS256` algorithm. this creates a "signature" that is included in the token. to verify the token, server decodes payload, re-hashes it using the same secret key and algo, and compares it to the signature. valid = match.
+
+header:
+
+```json
+{
+    "alg": "HS256",
+    "typ": "JWT"
+}
+```
+
+payload:
+
+```json
+{
+    "sub": "123456",
+    "name": "john doe",
+    "admin": true
+}
+```
+
+signature is created by encoding header, encoding payload, and using the secret key
+
+```scss
+HMACSHA256(
+    base64UrlEncode(header) + "." + base64UrlEncode(payload), secret
+)
+```
